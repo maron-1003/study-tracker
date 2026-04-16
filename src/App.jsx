@@ -432,11 +432,11 @@ export default function App() {
         </div>
       </div>
       
-      <div className="mt-6">
+      <div className="mt-6 w-full max-w-6xl">
         <h3 className="text-lg mb-2">今日のメモ</h3>
         <textarea
-          className="w-full p-3 rounded bg-gray-700"
-          rows="3"
+          className="w-full p-4 rounded bg-gray-700 text-lg"
+          rows="4"
           value={dailyMemo[selectedDate] || ""}
           onChange={(e) =>
             setDailyMemo({ ...dailyMemo, [selectedDate]: e.target.value })
@@ -468,11 +468,13 @@ export default function App() {
           <p className="text-gray-400">まだ記録がありません</p>
         )}
 
-        {selectedRecords.map((r, i) => (
-          <div
-            key={i}
-            className="bg-gray-800 p-4 rounded-lg shadow-md border border-gray-700 relative mb-3"
-          >
+      {selectedRecords.map((r, i) => (
+        <div
+          key={i}
+          className="bg-gray-800 p-4 rounded-lg shadow-md border border-gray-700 mb-3 flex gap-4"
+        >
+          {/* 左側：記録情報 */}
+          <div className="flex-1 relative">
             <button
               onClick={() => deleteRecord(records.indexOf(r))}
               className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
@@ -486,7 +488,20 @@ export default function App() {
             </p>
             <p className="text-sm text-gray-400">{r.fullDate}</p>
           </div>
-        ))}
+
+          {/* 右側：教科メモ */}
+          <div className="w-1/3">
+            <textarea
+              className="w-full h-full p-3 rounded bg-gray-700 text-sm"
+              placeholder={`${r.type} のメモ`}
+              value={subjectMemo[r.type] || ""}
+              onChange={(e) =>
+                setSubjectMemo({ ...subjectMemo, [r.type]: e.target.value })
+              }
+            />
+          </div>
+        </div>
+      ))}
 
         <h2 className="text-xl font-bold text-green-400 mt-4">
           この週の合計: {getWeeklyTotal()} 分
