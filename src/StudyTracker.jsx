@@ -74,14 +74,6 @@ export default function StudyTracker({ user, onLogout }) {
 
   const timerRef = useRef(null);
 
-  
-  const dailyTotals = {};
-  selectedRecords.forEach((r) => {
-    dailyTotals[r.type] = (dailyTotals[r.type] || 0) + r.minutes;
-  });
-
-  
-  const [dailyGoal, setDailyGoal] = useState(120);
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
   // 勉強記録を読み込み
@@ -387,7 +379,14 @@ export default function StudyTracker({ user, onLogout }) {
       },
     ],
   };
+  const dailyTotals = {};
+  selectedRecords.forEach((r) => {
+    dailyTotals[r.type] = (dailyTotals[r.type] || 0) + r.minutes;
+  });
 
+  
+  const [dailyGoal, setDailyGoal] = useState(120);
+  
   const dailyTotalsAll = getDailyTotals(records);
   const lineChartData = {
     labels: Object.keys(dailyTotalsAll),
