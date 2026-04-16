@@ -73,7 +73,7 @@ export default function StudyTracker({ user, onLogout }) {
   const [subjectMemo, setSubjectMemo] = useState({});
 
   const timerRef = useRef(null);
-
+  
   // 勉強記録を読み込み
   useEffect(() => {
     if (!user) return;
