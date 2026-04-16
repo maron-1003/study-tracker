@@ -436,18 +436,18 @@ export default function App() {
         </div>
       </div>
       
-      <div className="mt-6">
-        <h3 className="text-lg mb-2">今日のメモ</h3>
-        <textarea
-          className="w-full p-3 rounded bg-gray-700"
-          rows="3"
-          value={dailyMemo[selectedDate] || ""}
-          onChange={(e) =>
-            setDailyMemo({ ...dailyMemo, [selectedDate]: e.target.value })
-          }
-          placeholder="今日のメモを書いてください"
-        />
-      </div>
+        <div className="mt-6">
+          <h3 className="text-lg mb-2">今日のメモ</h3>
+          <textarea
+            className="w-full p-3 rounded bg-gray-700"
+            rows="3"
+            value={dailyMemo[selectedDate] || ""}
+            onChange={(e) =>
+              setDailyMemo({ ...dailyMemo, [selectedDate]: e.target.value })
+            }
+            placeholder="今日のメモを書いてください"
+          />
+        </div>
 
       <div className="mt-6">
         <h3 className="text-lg mb-2">{studyType || "教科"} のメモ</h3>
