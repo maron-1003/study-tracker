@@ -80,6 +80,26 @@ export default function App() {
     localStorage.setItem("subjects", JSON.stringify(subjects));
   }, [subjects]);
 
+  useEffect(() => {
+    localStorage.setItem("dailyMemo", JSON.stringify(dailyMemo));
+  }, [dailyMemo]);
+
+  useEffect(() => {
+    localStorage.setItem("subjectMemo", JSON.stringify(subjectMemo));
+  }, [subjectMemo]);
+
+  // 1日のメモ
+  const [dailyMemo, setDailyMemo] = useState(() => {
+    const saved = localStorage.getItem("dailyMemo");
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  // 教科ごとのメモ
+  const [subjectMemo, setSubjectMemo] = useState(() => {
+    const saved = localStorage.getItem("subjectMemo");
+    return saved ? JSON.parse(saved) : {};
+  });
+
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -347,7 +367,7 @@ export default function App() {
             追加
           </button>
         </div>
-        
+
         {/* 教科一覧（削除機能つき） */}
         <div className="mt-4">
           <h3 className="text-lg mb-2">追加した教科</h3>
@@ -414,6 +434,32 @@ export default function App() {
             +60分
           </button>
         </div>
+      </div>
+      <div className="mt-6">
+        <h3 className="text-lg mb-2">今日のメモ</h3>
+        <textarea
+          className="w-full p-3 rounded bg-gray-700"
+          rows="3"
+          value={dailyMemo[selectedDate] || ""}
+          onChange={(e) =>
+            setDailyMemo({ ...dailyMemo, [selectedDate]: e.target.value })
+          }
+          placeholder="今日のメモを書いてください"
+        />
+      </div>
+      
+      <div className="mt-6">
+        <h3 className="text-lg mb-2">{studyType || "教科"} のメモ</h3>
+        <textarea
+          className="w-full p-3 rounded bg-gray-700"
+          rows="3"
+          value={subjectMemo[studyType] || ""}
+          onChange={(e) =>
+            setSubjectMemo({ ...subjectMemo, [studyType]: e.target.value })
+          }
+          placeholder="この教科のメモを書いてください"
+          disabled={!studyType}
+        />
       </div>
 
       {/* 記録一覧 */}
