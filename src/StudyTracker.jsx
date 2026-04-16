@@ -1,0 +1,516 @@
+import { useState, useEffect, useRef } from "react";
+import { Doughnut, Bar, Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement,
+} from "chart.js";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import dayjs from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek";
+
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement
+);
+
+dayjs.extend(isoWeek);
+
+function getWeekNumber(date) {
+  return dayjs(date).isoWeek();
+}
+
+function getWeeklyChartData(records) {
+  const weekly = {};
+  records.forEach((r) => {
+    const week = getWeekNumber(r.date);
+    if (!weekly[week]) weekly[week] = 0;
+    weekly[week] += r.minutes;
+  });
+  return weekly;
+}
+
+function getDailyTotals(records) {
+  const daily = {};
+  records.forEach((r) => {
+    if (!daily[r.date]) daily[r.date] = 0;
+    daily[r.date] += r.minutes;
+  });
+  return daily;
+}
+
+export default function StudyTracker({ user, onLogout }) {
+  const [studyType, setStudyType] = useState("");
+  const [startTime, setStartTime] = useState(null);
+  const [elapsed, setElapsed] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const [records, setRecords] = useState([]);
+
+  const [selectedDate, setSelectedDate] = useState(
+    dayjs().format("YYYY-MM-DD")
+  );
+
+  const [subjects, setSubjects] = useState(() => {
+    const saved = localStorage.getItem("subjects");
+    return saved
+      ? JSON.parse(saved)
+      : ["国語", "数学", "英語", "理科", "社会"];
+  });
+
+  const [newSubject, setNewSubject] = useState("");
+
+  const [dailyMemo, setDailyMemo] = useState(() => {
+    const saved = localStorage.getItem("dailyMemo");
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const [subjectMemo, setSubjectMemo] = useState(() => {
+    const saved = localStorage.getItem("subjectMemo");
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  useEffect(() => {
+    localStorage.setItem("subjects", JSON.stringify(subjects));
+  }, [subjects]);
+
+  useEffect(() => {
+    localStorage.setItem("dailyMemo", JSON.stringify(dailyMemo));
+  }, [dailyMemo]);
+
+  useEffect(() => {
+    localStorage.setItem("subjectMemo", JSON.stringify(subjectMemo));
+  }, [subjectMemo]);
+
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("study_records");
+    if (saved) setRecords(JSON.parse(saved));
+  }, []);
+
+  const handleStart = () => {
+    if (!studyType) {
+      alert("勉強内容を選択してください");
+      return;
+    }
+    const now = new Date();
+    setStartTime(now);
+    setIsRunning(true);
+
+    timerRef.current = setInterval(() => {
+      setElapsed((prev) => prev + 1);
+    }, 1000);
+  };
+
+  const handlePause = () => {
+    clearInterval(timerRef.current);
+    setIsRunning(false);
+  };
+
+  const handleStop = () => {
+    if (!startTime) return;
+
+    clearInterval(timerRef.current);
+    setIsRunning(false);
+
+    const end = new Date();
+    const minutes = Math.floor(elapsed / 60);
+
+    const newRecord = {
+      type: studyType,
+      start: startTime.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      end: end.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      minutes,
+      date: selectedDate,
+      fullDate: `${selectedDate} ${end.toLocaleTimeString()}`,
+    };
+
+    const updated = [...records, newRecord];
+    setRecords(updated);
+    localStorage.setItem("study_records", JSON.stringify(updated));
+
+    setStartTime(null);
+    setElapsed(0);
+  };
+
+  const deleteRecord = (index) => {
+    const updated = records.filter((_, i) => i !== index);
+    setRecords(updated);
+    localStorage.setItem("study_records", JSON.stringify(updated));
+  };
+
+  const addTestTime = (minutes) => {
+    if (!studyType) {
+      alert("勉強内容を選択してください");
+      return;
+    }
+
+    const now = new Date();
+    const newRecord = {
+      type: studyType,
+      start: "--",
+      end: "--",
+      minutes,
+      date: selectedDate,
+      fullDate: `${selectedDate} ${now.toLocaleTimeString()}`,
+    };
+
+    const updated = [...records, newRecord];
+    setRecords(updated);
+    localStorage.setItem("study_records", JSON.stringify(updated));
+  };
+
+  const groupedByDate = records.reduce((acc, r) => {
+    if (!acc[r.date]) acc[r.date] = [];
+    acc[r.date].push(r);
+    return acc;
+  }, {});
+
+  const selectedRecords = groupedByDate[selectedDate] || [];
+
+  const dailyTotals = {};
+  selectedRecords.forEach((r) => {
+    dailyTotals[r.type] = (dailyTotals[r.type] || 0) + r.minutes;
+  });
+
+  const colorMap = {
+    英語: "#3b82f6",
+    数学: "#10b981",
+    国語: "#f59e0b",
+    理科: "#ef4444",
+    社会: "#8b5cf6",
+    暗記: "#ec4899",
+    自習: "#22c55e",
+  };
+
+  const dailyChartData = {
+    labels: Object.keys(dailyTotals),
+    datasets: [
+      {
+        data: Object.values(dailyTotals),
+        backgroundColor: Object.keys(dailyTotals).map(
+          (type) => colorMap[type] || "#ffffff"
+        ),
+      },
+    ],
+  };
+
+  const getWeeklyTotal = () => {
+    const thisWeek = dayjs(selectedDate).isoWeek();
+    let total = 0;
+
+    records.forEach((r) => {
+      if (dayjs(r.date).isoWeek() === thisWeek) {
+        total += r.minutes;
+      }
+    });
+
+    return total;
+  };
+
+  const weeklyData = getWeeklyChartData(records);
+  const weeklyChartData = {
+    labels: Object.keys(weeklyData).map((w) => `Week ${w}`),
+    datasets: [
+      {
+        label: "週の合計勉強時間（分）",
+        data: Object.values(weeklyData),
+        backgroundColor: "rgba(59, 130, 246, 0.7)",
+      },
+    ],
+  };
+
+  const dailyTotalsAll = getDailyTotals(records);
+  const lineChartData = {
+    labels: Object.keys(dailyTotalsAll),
+    datasets: [
+      {
+        label: "1日の合計勉強時間（分）",
+        data: Object.values(dailyTotalsAll),
+        borderColor: "rgba(56, 189, 248, 1)",
+        backgroundColor: "rgba(56, 189, 248, 0.3)",
+        tension: 0.3,
+        fill: true,
+      },
+    ],
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center">
+
+      {/* ヘッダー */}
+      <div className="w-full max-w-6xl flex justify-between items-center mb-6">
+        <h2 className="text-xl text-blue-300 font-bold">
+          ようこそ、{user.nickname} さん
+        </h2>
+        <button
+          onClick={onLogout}
+          className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded"
+        >
+          ログアウト
+        </button>
+      </div>
+
+      {/* カレンダーのダークテーマ */}
+      <style>{`
+        .react-calendar {
+          background-color: #1f2937 !important;
+          color: white !important;
+          border: 2px solid #3b82f6 !important;
+          border-radius: 12px;
+          padding: 10px;
+        }
+        .react-calendar__tile {
+          background: transparent !important;
+          color: white !important;
+          border-radius: 8px;
+        }
+        .react-calendar__tile--active {
+          background: #2563eb !important;
+          color: white !important;
+          box-shadow: 0 0 10px #3b82f6;
+        }
+        .react-calendar__tile:hover {
+          background: #1e40af !important;
+        }
+        .react-calendar__tile--now {
+          background: rgba(59, 130, 246, 0.3) !important;
+          border: 2px solid #3b82f6 !important;
+          color: #ffffff !important;
+          box-shadow: 0 0 12px #3b82f6;
+        }
+      `}</style>
+
+      <h1 className="text-4xl font-extrabold text-blue-400 mb-8 drop-shadow-[0_0_10px_#3b82f6]">
+        Study Tracker
+      </h1>
+
+      {/* カレンダー＋日別グラフ */}
+      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div className="bg-gray-800 p-4 rounded-xl shadow-lg border border-blue-500">
+          <h2 className="text-xl font-bold text-blue-300 mb-2">日付を選択</h2>
+
+          <Calendar
+            onChange={(value) =>
+              setSelectedDate(dayjs(value).format("YYYY-MM-DD"))
+            }
+            value={new Date(selectedDate)}
+          />
+        </div>
+
+        <div className="bg-gray-800 p-6 rounded-xl shadow-lg">
+          <h2 className="text-2xl font-bold mb-4 text-blue-300">
+            {selectedDate} の勉強割合
+          </h2>
+
+          {selectedRecords.length > 0 ? (
+            <Doughnut data={dailyChartData} />
+          ) : (
+            <p className="text-gray-400">この日の記録はありません</p>
+          )}
+        </div>
+      </div>
+
+      {/* タイマー */}
+      <div className="w-full max-w-4xl bg-gray-800 p-6 rounded-xl shadow-lg mt-10">
+
+        <select
+          value={studyType}
+          onChange={(e) => setStudyType(e.target.value)}
+          className="w-full p-3 mb-4 rounded bg-gray-700"
+        >
+          <option value="">勉強内容を選択</option>
+
+          {subjects.map((subj) => (
+            <option key={subj} value={subj}>
+              {subj}
+            </option>
+          ))}
+
+          <option value="暗記">暗記</option>
+          <option value="自習">自習</option>
+        </select>
+        
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={newSubject}
+            onChange={(e) => setNewSubject(e.target.value)}
+            placeholder="教科を追加（例：技術）"
+            className="flex-1 p-2 rounded bg-gray-700"
+          />
+          <button
+            onClick={() => {
+              if (newSubject.trim() === "") return;
+              if (subjects.includes(newSubject)) return;
+              setSubjects([...subjects, newSubject]);
+              setNewSubject("");
+            }}
+            className="px-4 py-2 bg-blue-500 rounded"
+          >
+            追加
+          </button>
+        </div>
+
+        <div className="mt-4">
+          <h3 className="text-lg mb-2">追加した教科</h3>
+
+          {subjects
+            .filter((s) => !["国語", "数学", "英語", "理科", "社会"].includes(s))
+            .map((subj) => (
+              <div key={subj} className="flex justify-between items-center mb-2">
+                <span>{subj}</span>
+                <button
+                  onClick={() =>
+                    setSubjects(subjects.filter((item) => item !== subj))
+                  }
+                  className="px-2 py-1 bg-red-500 rounded"
+                >
+                  削除
+                </button>
+              </div>
+            ))}
+        </div>
+
+        <div className="text-center text-3xl font-bold mb-4">
+          {Math.floor(elapsed / 60)}分 {elapsed % 60}秒
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleStart}
+            disabled={isRunning}
+            className="flex-1 bg-green-500 hover:bg-green-600 p-3 rounded font-bold disabled:bg-gray-600"
+          >
+            スタート
+          </button>
+
+          <button
+            onClick={handlePause}
+            disabled={!isRunning}
+            className="flex-1 bg-yellow-500 hover:bg-yellow-600 p-3 rounded font-bold disabled:bg-gray-600"
+          >
+            一時停止
+          </button>
+
+          <button
+            onClick={handleStop}
+            disabled={elapsed === 0}
+            className="flex-1 bg-red-500 hover:bg-red-600 p-3 rounded font-bold disabled:bg-gray-600"
+          >
+            ストップ
+          </button>
+        </div>
+
+        <div className="mt-4 grid grid-cols-4 gap-2">
+          <button onClick={() => addTestTime(1)} className="bg-blue-500 p-2 rounded">
+            +1分
+          </button>
+          <button onClick={() => addTestTime(5)} className="bg-blue-500 p-2 rounded">
+            +5分
+          </button>
+          <button onClick={() => addTestTime(30)} className="bg-blue-500 p-2 rounded">
+            +30分
+          </button>
+          <button onClick={() => addTestTime(60)} className="bg-blue-500 p-2 rounded">
+            +60分
+          </button>
+        </div>
+      </div>
+      
+      <div className="mt-6 w-full max-w-6xl">
+        <h3 className="text-lg mb-2">今日のメモ</h3>
+        <textarea
+          className="w-full p-4 rounded bg-gray-700 text-lg"
+          rows="4"
+          value={dailyMemo[selectedDate] || ""}
+          onChange={(e) =>
+            setDailyMemo({ ...dailyMemo, [selectedDate]: e.target.value })
+          }
+          placeholder="今日のメモを書いてください"
+        />
+      </div>
+
+      <div className="w-full max-w-6xl mt-12">
+        <h2 className="text-2xl font-bold mb-4 text-blue-300">
+          {selectedDate} の記録一覧
+        </h2>
+
+        {selectedRecords.length === 0 && (
+          <p className="text-gray-400">まだ記録がありません</p>
+        )}
+
+        {selectedRecords.map((r, i) => (
+          <div
+            key={i}
+            className="bg-gray-800 p-4 rounded-lg shadow-md border border-gray-700 mb-3 flex gap-4"
+          >
+            <div className="flex-1 relative">
+              <button
+                onClick={() => deleteRecord(records.indexOf(r))}
+                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+              >
+                削除
+              </button>
+
+              <p className="font-bold text-blue-300 text-lg">{r.type}</p>
+              <p>
+                {r.start} 〜 {r.end}（{r.minutes} 分）
+              </p>
+              <p className="text-sm text-gray-400">{r.fullDate}</p>
+            </div>
+
+            <div className="w-1/3">
+              <textarea
+                className="w-full h-full p-3 rounded bg-gray-700 text-sm"
+                placeholder={`${r.type} のメモ`}
+                value={subjectMemo[r.type] || ""}
+                onChange={(e) =>
+                  setSubjectMemo({ ...subjectMemo, [r.type]: e.target.value })
+                }
+              />
+            </div>
+          </div>
+        ))}
+
+        <h2 className="text-xl font-bold text-green-400 mt-4">
+          この週の合計: {getWeeklyTotal()} 分
+        </h2>
+
+        <div className="bg-gray-800 p-6 rounded-xl shadow-lg mt-10">
+          <h2 className="text-2xl font-bold mb-4 text-purple-300">
+            週ごとの勉強時間グラフ
+          </h2>
+          <Bar data={weeklyChartData} />
+        </div>
+
+        <div className="bg-gray-800 p-6 rounded-xl shadow-lg mt-10">
+          <h2 className="text-2xl font-bold mb-4 text-cyan-300">
+            日ごとの勉強時間推移
+          </h2>
+          <Line data={lineChartData} />
+        </div>
+      </div>
+    </div>
+  );
+}
