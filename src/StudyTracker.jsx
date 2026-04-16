@@ -73,6 +73,8 @@ export default function StudyTracker({ user, onLogout }) {
   const [subjectMemo, setSubjectMemo] = useState({});
 
   const timerRef = useRef(null);
+  const [dailyGoal, setDailyGoal] = useState(user.daily_goal);
+  const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
   // 勉強記録を読み込み
   useEffect(() => {
@@ -413,6 +415,23 @@ export default function StudyTracker({ user, onLogout }) {
           ログアウト
         </button>
       </div>
+
+      <div className="w-full max-w-6xl bg-gray-800 p-4 rounded mb-6">
+      <h3 className="text-lg font-bold mb-2">今日の目標</h3>
+
+      <div className="w-full bg-gray-700 h-4 rounded">
+          <div
+          className="h-4 bg-green-500 rounded"
+          style={{
+            width: `${Math.min((todayTotal / dailyGoal) * 100, 100)}%`
+          }}
+          ></div>
+      </div>
+
+    <p className="mt-2 text-gray-300">
+        {todayTotal} / {dailyGoal} 分
+    </p>
+    </div>
 
       {/* カレンダーのダークテーマ */}
       <style>{`

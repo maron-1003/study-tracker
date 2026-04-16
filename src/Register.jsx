@@ -52,7 +52,11 @@ export default function Register({ onRegister, onSwitchToLogin }) {
     }
 
     // ④ 登録成功 → App.jsx にユーザー情報を渡す
-    onRegister({ id: data.id, nickname: data.nickname });
+    onRegister({
+    id: data.id,
+    nickname: data.nickname,
+    daily_goal: data.daily_goal
+    });
 
     setLoading(false);
   };

@@ -38,7 +38,11 @@ export default function Login({ onLogin, onSwitchToRegister }) {
     }
 
     // ③ ログイン成功 → App.jsx にユーザー情報を渡す
-    onLogin({ id: user.id, nickname: user.nickname });
+    onLogin({
+    id: user.id,
+    nickname: user.nickname,
+    daily_goal: user.daily_goal
+    });
 
     setLoading(false);
   };
