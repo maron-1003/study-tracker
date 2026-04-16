@@ -75,19 +75,6 @@ export default function App() {
 
 
   const [newSubject, setNewSubject] = useState("");
-
-  useEffect(() => {
-    localStorage.setItem("subjects", JSON.stringify(subjects));
-  }, [subjects]);
-
-  useEffect(() => {
-    localStorage.setItem("dailyMemo", JSON.stringify(dailyMemo));
-  }, [dailyMemo]);
-
-  useEffect(() => {
-    localStorage.setItem("subjectMemo", JSON.stringify(subjectMemo));
-  }, [subjectMemo]);
-
   // 1日のメモ
   const [dailyMemo, setDailyMemo] = useState(() => {
     const saved = localStorage.getItem("dailyMemo");
@@ -101,6 +88,19 @@ export default function App() {
   });
 
   const timerRef = useRef(null);
+
+
+  useEffect(() => {
+    localStorage.setItem("subjects", JSON.stringify(subjects));
+  }, [subjects]);
+
+  useEffect(() => {
+    localStorage.setItem("dailyMemo", JSON.stringify(dailyMemo));
+  }, [dailyMemo]);
+
+  useEffect(() => {
+    localStorage.setItem("subjectMemo", JSON.stringify(subjectMemo));
+  }, [subjectMemo]);
 
   useEffect(() => {
     const saved = localStorage.getItem("study_records");
