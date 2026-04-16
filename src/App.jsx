@@ -66,15 +66,19 @@ export default function App() {
     dayjs().format("YYYY-MM-DD")
   );
 
-  const [subjects, setSubjects] = useState([
-    "国語",
-    "数学",
-    "英語",
-    "理科",
-    "社会",
-  ]);
+  const [subjects, setSubjects] = useState(() => {
+    const saved = localStorage.getItem("subjects");
+    return saved
+      ? JSON.parse(saved)
+      : ["国語", "数学", "英語", "理科", "社会"];
+  });
+
 
   const [newSubject, setNewSubject] = useState("");
+  
+  useEffect(() => {
+    localStorage.setItem("subjects", JSON.stringify(subjects));
+  }, [subjects]);
 
   const timerRef = useRef(null);
 
