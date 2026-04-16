@@ -66,6 +66,16 @@ export default function App() {
     dayjs().format("YYYY-MM-DD")
   );
 
+  const [subjects, setSubjects] = useState([
+    "国語",
+    "数学",
+    "英語",
+    "理科",
+    "社会",
+  ]);
+
+  const [newSubject, setNewSubject] = useState("");
+
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -300,14 +310,40 @@ export default function App() {
           className="w-full p-3 mb-4 rounded bg-gray-700"
         >
           <option value="">勉強内容を選択</option>
-          <option value="英語">英語</option>
-          <option value="数学">数学</option>
-          <option value="国語">国語</option>
-          <option value="理科">理科</option>
-          <option value="社会">社会</option>
+
+          {/* 教科（固定 + 追加したもの） */}
+          {subjects.map((subj) => (
+            <option key={subj} value={subj}>
+              {subj}
+            </option>
+          ))}
+
+          {/* 暗記・自習は今まで通り */}
           <option value="暗記">暗記</option>
           <option value="自習">自習</option>
         </select>
+        
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={newSubject}
+            onChange={(e) => setNewSubject(e.target.value)}
+            placeholder="教科を追加（例：技術）"
+            className="flex-1 p-2 rounded bg-gray-700"
+          />
+          <button
+            onClick={() => {
+              if (newSubject.trim() === "") return;
+              if (subjects.includes(newSubject)) return; // 重複防止
+              setSubjects([...subjects, newSubject]);
+              setNewSubject("");
+            }}
+            className="px-4 py-2 bg-blue-500 rounded"
+          >
+            追加
+          </button>
+        </div>
+
 
         <div className="text-center text-3xl font-bold mb-4">
           {Math.floor(elapsed / 60)}分 {elapsed % 60}秒
