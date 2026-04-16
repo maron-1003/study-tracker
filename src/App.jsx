@@ -75,7 +75,7 @@ export default function App() {
 
 
   const [newSubject, setNewSubject] = useState("");
-  
+
   useEffect(() => {
     localStorage.setItem("subjects", JSON.stringify(subjects));
   }, [subjects]);
@@ -346,6 +346,27 @@ export default function App() {
           >
             追加
           </button>
+        </div>
+        
+        {/* 教科一覧（削除機能つき） */}
+        <div className="mt-4">
+          <h3 className="text-lg mb-2">追加した教科</h3>
+
+          {subjects
+            .filter((s) => !["国語", "数学", "英語", "理科", "社会"].includes(s))
+            .map((subj) => (
+              <div key={subj} className="flex justify-between items-center mb-2">
+                <span>{subj}</span>
+                <button
+                  onClick={() =>
+                    setSubjects(subjects.filter((item) => item !== subj))
+                  }
+                  className="px-2 py-1 bg-red-500 rounded"
+                >
+                  削除
+                </button>
+              </div>
+            ))}
         </div>
 
 
