@@ -30,17 +30,13 @@ export default function App() {
     setMode("login");
   };
 
-  // ログイン成功
-  const handleLogin = () => {
-    // user は onAuthStateChange で自動セットされる
-  };
+  // ログイン成功（何もしなくてOK）
+  const handleLogin = () => {};
 
-  // 新規登録成功
-  const handleRegister = () => {
-    // user は onAuthStateChange で自動セットされる
-  };
+  // 新規登録成功（何もしなくてOK）
+  const handleRegister = () => {};
 
-  // 🔥 画面切り替えは user の有無だけで判断
+  // 🔥 user がいれば StudyTracker に遷移
   if (user) {
     return <StudyTracker user={user} onLogout={handleLogout} />;
   }
