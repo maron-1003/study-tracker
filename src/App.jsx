@@ -435,6 +435,7 @@ export default function App() {
           </button>
         </div>
       </div>
+      
       <div className="mt-6">
         <h3 className="text-lg mb-2">今日のメモ</h3>
         <textarea
@@ -447,7 +448,7 @@ export default function App() {
           placeholder="今日のメモを書いてください"
         />
       </div>
-      
+
       <div className="mt-6">
         <h3 className="text-lg mb-2">{studyType || "教科"} のメモ</h3>
         <textarea
