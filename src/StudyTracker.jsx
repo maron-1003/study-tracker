@@ -73,7 +73,7 @@ export default function StudyTracker({ user, onLogout }) {
   const [subjectMemo, setSubjectMemo] = useState({});
 
   const timerRef = useRef(null);
-  const [dailyGoal, setDailyGoal] = useState(user.daily_goal);
+  const [dailyGoal, setDailyGoal] = useState(120);
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
   // 勉強記録を読み込み
