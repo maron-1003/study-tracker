@@ -73,7 +73,7 @@ export default function StudyTracker({ user, onLogout }) {
   const [subjectMemo, setSubjectMemo] = useState({});
 
   const timerRef = useRef(null);
-  
+
   // 勉強記録を読み込み
   useEffect(() => {
     if (!user) return;
@@ -403,8 +403,9 @@ export default function StudyTracker({ user, onLogout }) {
       {/* ヘッダー */}
       <div className="w-full max-w-6xl flex justify-between items-center mb-6">
         <h2 className="text-xl text-blue-300 font-bold">
-          ようこそ、{user.user_metadata?.nickname || "ユーザー"} さん
+        ようこそ、{user.nickname} さん
         </h2>
+
         <button
           onClick={onLogout}
           className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded"
