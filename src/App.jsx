@@ -66,6 +66,7 @@ export default function App() {
     dayjs().format("YYYY-MM-DD")
   );
 
+  // 教科（localStorage対応）
   const [subjects, setSubjects] = useState(() => {
     const saved = localStorage.getItem("subjects");
     return saved
@@ -73,8 +74,8 @@ export default function App() {
       : ["国語", "数学", "英語", "理科", "社会"];
   });
 
-
   const [newSubject, setNewSubject] = useState("");
+
   // 1日のメモ
   const [dailyMemo, setDailyMemo] = useState(() => {
     const saved = localStorage.getItem("dailyMemo");
@@ -87,9 +88,7 @@ export default function App() {
     return saved ? JSON.parse(saved) : {};
   });
 
-  const timerRef = useRef(null);
-
-
+  // ▼ useEffect は state の後に置く（これが正しい）
   useEffect(() => {
     localStorage.setItem("subjects", JSON.stringify(subjects));
   }, [subjects]);
@@ -101,6 +100,8 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("subjectMemo", JSON.stringify(subjectMemo));
   }, [subjectMemo]);
+
+  const timerRef = useRef(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("study_records");
@@ -198,15 +199,14 @@ export default function App() {
     dailyTotals[r.type] = (dailyTotals[r.type] || 0) + r.minutes;
   });
 
-  // 勉強内容ごとの色（落ち着いた勉強サイト風）
   const colorMap = {
-    英語: "#3b82f6",   // 青
-    数学: "#10b981",   // 緑
-    国語: "#f59e0b",   // 黄
-    理科: "#ef4444",   // 赤
-    社会: "#8b5cf6",   // 紫
-    暗記: "#ec4899",   // ピンク
-    自習: "#22c55e",   // 明るい緑
+    英語: "#3b82f6",
+    数学: "#10b981",
+    国語: "#f59e0b",
+    理科: "#ef4444",
+    社会: "#8b5cf6",
+    暗記: "#ec4899",
+    自習: "#22c55e",
   };
 
   const dailyChartData = {
@@ -335,14 +335,12 @@ export default function App() {
         >
           <option value="">勉強内容を選択</option>
 
-          {/* 教科（固定 + 追加したもの） */}
           {subjects.map((subj) => (
             <option key={subj} value={subj}>
               {subj}
             </option>
           ))}
 
-          {/* 暗記・自習は今まで通り */}
           <option value="暗記">暗記</option>
           <option value="自習">自習</option>
         </select>
@@ -358,7 +356,7 @@ export default function App() {
           <button
             onClick={() => {
               if (newSubject.trim() === "") return;
-              if (subjects.includes(newSubject)) return; // 重複防止
+              if (subjects.includes(newSubject)) return;
               setSubjects([...subjects, newSubject]);
               setNewSubject("");
             }}
@@ -368,7 +366,6 @@ export default function App() {
           </button>
         </div>
 
-        {/* 教科一覧（削除機能つき） */}
         <div className="mt-4">
           <h3 className="text-lg mb-2">追加した教科</h3>
 
@@ -388,7 +385,6 @@ export default function App() {
               </div>
             ))}
         </div>
-
 
         <div className="text-center text-3xl font-bold mb-4">
           {Math.floor(elapsed / 60)}分 {elapsed % 60}秒
@@ -436,18 +432,18 @@ export default function App() {
         </div>
       </div>
       
-        <div className="mt-6">
-          <h3 className="text-lg mb-2">今日のメモ</h3>
-          <textarea
-            className="w-full p-3 rounded bg-gray-700"
-            rows="3"
-            value={dailyMemo[selectedDate] || ""}
-            onChange={(e) =>
-              setDailyMemo({ ...dailyMemo, [selectedDate]: e.target.value })
-            }
-            placeholder="今日のメモを書いてください"
-          />
-        </div>
+      <div className="mt-6">
+        <h3 className="text-lg mb-2">今日のメモ</h3>
+        <textarea
+          className="w-full p-3 rounded bg-gray-700"
+          rows="3"
+          value={dailyMemo[selectedDate] || ""}
+          onChange={(e) =>
+            setDailyMemo({ ...dailyMemo, [selectedDate]: e.target.value })
+          }
+          placeholder="今日のメモを書いてください"
+        />
+      </div>
 
       <div className="mt-6">
         <h3 className="text-lg mb-2">{studyType || "教科"} のメモ</h3>
@@ -463,7 +459,6 @@ export default function App() {
         />
       </div>
 
-      {/* 記録一覧 */}
       <div className="w-full max-w-6xl mt-12">
         <h2 className="text-2xl font-bold mb-4 text-blue-300">
           {selectedDate} の記録一覧
@@ -497,7 +492,6 @@ export default function App() {
           この週の合計: {getWeeklyTotal()} 分
         </h2>
 
-        {/* 週グラフ */}
         <div className="bg-gray-800 p-6 rounded-xl shadow-lg mt-10">
           <h2 className="text-2xl font-bold mb-4 text-purple-300">
             週ごとの勉強時間グラフ
@@ -505,7 +499,6 @@ export default function App() {
           <Bar data={weeklyChartData} />
         </div>
 
-        {/* 日ごとの折れ線グラフ */}
         <div className="bg-gray-800 p-6 rounded-xl shadow-lg mt-10">
           <h2 className="text-2xl font-bold mb-4 text-cyan-300">
             日ごとの勉強時間推移
