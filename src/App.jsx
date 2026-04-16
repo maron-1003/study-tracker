@@ -10,10 +10,21 @@ export default function App() {
   // 🔥 ログイン状態を localStorage で保持
   useEffect(() => {
     const saved = localStorage.getItem("user");
+
+    // 🔥 古いデータが残っていたら削除する
     if (saved) {
-      setUser(JSON.parse(saved));
+      const parsed = JSON.parse(saved);
+
+      // nickname が "ユーザー" なら削除してログインし直させる
+      if (parsed.nickname === "ユーザー") {
+        localStorage.removeItem("user");
+        return;
+      }
+
+      setUser(parsed);
     }
   }, []);
+
 
   const handleLogin = (userData) => {
     setUser(userData);
