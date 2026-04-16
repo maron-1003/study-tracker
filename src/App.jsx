@@ -445,20 +445,6 @@ export default function App() {
         />
       </div>
 
-      <div className="mt-6">
-        <h3 className="text-lg mb-2">{studyType || "教科"} のメモ</h3>
-        <textarea
-          className="w-full p-3 rounded bg-gray-700"
-          rows="3"
-          value={subjectMemo[studyType] || ""}
-          onChange={(e) =>
-            setSubjectMemo({ ...subjectMemo, [studyType]: e.target.value })
-          }
-          placeholder="この教科のメモを書いてください"
-          disabled={!studyType}
-        />
-      </div>
-
       <div className="w-full max-w-6xl mt-12">
         <h2 className="text-2xl font-bold mb-4 text-blue-300">
           {selectedDate} の記録一覧
