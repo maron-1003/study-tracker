@@ -1,32 +1,44 @@
 import { useState } from "react";
 import { supabase } from "./supabaseClient";
+import bcrypt from "bcryptjs";
 
 export default function Login({ onLogin, onSwitchToRegister }) {
-  const [email, setEmail] = useState("");
+  const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      alert("メールアドレスとパスワードを入力してください");
+    if (!nickname || !password) {
+      alert("ニックネームとパスワードを入力してください");
       return;
     }
 
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    // ① ニックネームでユーザー検索
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("nickname", nickname)
+      .single();
 
-    if (error) {
-      alert("ログイン失敗：" + error.message);
+    if (error || !user) {
+      alert("ユーザーが見つかりません");
       setLoading(false);
       return;
     }
 
-    // 🔥 App.jsx の onLogin を呼ぶ（画面切り替え用）
-    onLogin();
+    // ② パスワード照合
+    const isValid = await bcrypt.compare(password, user.password_hash);
+
+    if (!isValid) {
+      alert("パスワードが違います");
+      setLoading(false);
+      return;
+    }
+
+    // ③ ログイン成功 → App.jsx にユーザー情報を渡す
+    onLogin({ id: user.id, nickname: user.nickname });
 
     setLoading(false);
   };
@@ -39,10 +51,10 @@ export default function Login({ onLogin, onSwitchToRegister }) {
         </h1>
 
         <input
-          type="email"
-          placeholder="メールアドレス"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          placeholder="ニックネーム"
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
           className="w-full p-3 mb-4 rounded bg-gray-700 focus:outline-none"
         />
 

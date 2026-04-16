@@ -9,9 +9,9 @@ export default function App() {
 
   // 🔥 ログイン状態を localStorage で保持
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    const saved = localStorage.getItem("user");
+    if (saved) {
+      setUser(JSON.parse(saved));
     }
   }, []);
 
@@ -31,10 +31,12 @@ export default function App() {
     setMode("login");
   };
 
+  // 🔥 user がいれば StudyTracker を表示
   if (user) {
     return <StudyTracker user={user} onLogout={handleLogout} />;
   }
 
+  // 🔥 user がいないときだけ login/register
   return (
     <div>
       {mode === "login" && (
