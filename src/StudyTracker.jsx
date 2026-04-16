@@ -73,6 +73,14 @@ export default function StudyTracker({ user, onLogout }) {
   const [subjectMemo, setSubjectMemo] = useState({});
 
   const timerRef = useRef(null);
+
+  
+  const dailyTotals = {};
+  selectedRecords.forEach((r) => {
+    dailyTotals[r.type] = (dailyTotals[r.type] || 0) + r.minutes;
+  });
+
+  
   const [dailyGoal, setDailyGoal] = useState(120);
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
@@ -332,11 +340,6 @@ export default function StudyTracker({ user, onLogout }) {
   }, {});
 
   const selectedRecords = groupedByDate[selectedDate] || [];
-
-  const dailyTotals = {};
-  selectedRecords.forEach((r) => {
-    dailyTotals[r.type] = (dailyTotals[r.type] || 0) + r.minutes;
-  });
 
   const colorMap = {
     英語: "#3b82f6",
