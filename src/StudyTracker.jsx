@@ -54,6 +54,14 @@ function getDailyTotals(records) {
   });
   return daily;
 }
+function getSubjectTotals(records) {
+  const subjects = {};
+  records.forEach((r) => {
+    if (!subjects[r.type]) subjects[r.type] = 0;
+    subjects[r.type] += r.minutes;
+  });
+  return subjects;
+}
 
 
 export default function StudyTracker({ user, onLogout }) {
@@ -86,6 +94,9 @@ export default function StudyTracker({ user, onLogout }) {
   );
 
   const timerRef = useRef(null);
+  
+  const subjectTotals = getSubjectTotals(records);
+  const subjectMinutes = subjectTotals[goalSubject] || 0;
 
 
   // 勉強記録を読み込み
@@ -440,44 +451,70 @@ export default function StudyTracker({ user, onLogout }) {
   console.log("dailyTotals", dailyTotals);
 
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
-
+  
   useEffect(() => {
-    if (!isRunning) return;
     if (goalAchieved) return;
+
+    const dailyTotals = getDailyTotals(records);
+    const subjectTotals = getSubjectTotals(records);
 
     // 現在の経過時間（分）
     const currentMinutes = Math.floor(elapsed / 60);
 
     // 科目指定あり → 科目別チェック
     if (goalSubject) {
-      const subjectMinutes = records
-        .filter((r) => r.type === goalSubject)
-        .reduce((sum, r) => sum + r.minutes, 0);
+      const savedMinutes = subjectTotals[goalSubject] || 0;
 
-      const total = subjectMinutes + currentMinutes;
+      // 今勉強中の科目が目標科目なら加算
+      const total = studyType === goalSubject
+        ? savedMinutes + currentMinutes
+        : savedMinutes;
 
-      console.log("【DEBUG】リアルタイム科目別 =", total);
+      console.log("【DEBUG】科目別 minutes =", total);
 
       if (total >= dailyGoal) {
-        console.log("🎉【DEBUG】リアルタイム科目別達成！！");
+        console.log("🎉【DEBUG】科目別目標達成！！");
         setGoalAchieved(true);
       }
       return;
     }
 
     // 科目指定なし → 日別チェック
-    const dailyTotals = getDailyTotals(records);
-    const todayMinutes = dailyTotals[selectedDate] || 0;
+    const savedToday = dailyTotals[selectedDate] || 0;
 
-    const total = todayMinutes + currentMinutes;
+    const total = savedToday + currentMinutes;
 
-    console.log("【DEBUG】リアルタイム日別 =", total);
+    console.log("【DEBUG】日別 minutes =", total);
 
     if (total >= dailyGoal) {
-      console.log("🎉【DEBUG】リアルタイム日別達成！！");
+      console.log("🎉【DEBUG】日別目標達成！！");
       setGoalAchieved(true);
     }
-  }, [elapsed, isRunning, goalSubject, dailyGoal, records, selectedDate]);
+  }, [records, selectedDate, goalSubject, dailyGoal, elapsed, studyType]);
+
+  useEffect(() => {
+    if (!goalAchieved) return;
+
+    console.log("🎆【DEBUG】エフェクト発動処理が実行されました！");
+
+    const effect = document.createElement("div");
+    effect.innerText = "🎉 目標達成！ 🎉";
+    effect.style.position = "fixed";
+    effect.style.top = "40%";
+    effect.style.left = "50%";
+    effect.style.transform = "translate(-50%, -50%)";
+    effect.style.fontSize = "48px";
+    effect.style.fontWeight = "bold";
+    effect.style.color = "#ff4081";
+    effect.style.zIndex = "9999";
+    effect.style.animation = "fadeout 2s forwards";
+
+    document.body.appendChild(effect);
+
+    setTimeout(() => {
+      effect.remove();
+    }, 2000);
+  }, [goalAchieved]);
 
   const colorMap = {
     英語: "#3b82f6",
