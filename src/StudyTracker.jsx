@@ -801,7 +801,7 @@ export default function StudyTracker({ user, onLogout }) {
             <button
               onClick={() => {
                 setGoalAchieved(false);
-                setGoalTriggered(false);
+                // ❌ setGoalTriggered(false) ← これがループの原因
               }}
               className="px-4 py-2 bg-white text-green-700 font-bold rounded"
             >
