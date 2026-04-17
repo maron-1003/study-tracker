@@ -73,6 +73,9 @@ export default function StudyTracker({ user, onLogout }) {
   const [subjectMemo, setSubjectMemo] = useState({});
   const [dailyGoal, setDailyGoal] = useState(120);
 
+  const [goalSubject, setGoalSubject] = useState("");
+  const [isGoalSettingOpen, setIsGoalSettingOpen] = useState(false);
+
   const timerRef = useRef(null);
 
 
@@ -420,6 +423,12 @@ export default function StudyTracker({ user, onLogout }) {
         
     <div className="w-full max-w-6xl bg-gray-800 p-4 rounded mb-6">
         <h3 className="text-lg font-bold mb-2">今日の目標</h3>
+        <button
+          onClick={() => setIsGoalSettingOpen(true)}
+          className="mb-3 px-3 py-1 bg-blue-500 rounded hover:bg-blue-600"
+        >
+          目標を設定する
+        </button>
 
         <div className="w-full bg-gray-700 h-4 rounded">
             <div
@@ -431,7 +440,7 @@ export default function StudyTracker({ user, onLogout }) {
         </div>
 
         <p className="mt-2 text-gray-300">
-            {todayTotal} / {dailyGoal} 分
+          {goalSubject ? `${goalSubject}：` : ""} {todayTotal} / {dailyGoal} 分
         </p>
         </div>
 
@@ -675,6 +684,51 @@ export default function StudyTracker({ user, onLogout }) {
           <Line data={lineChartData} />
         </div>
       </div>
-    </div>
-  );
+          {isGoalSettingOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+            <div className="bg-gray-800 p-6 rounded-lg w-80">
+              <h2 className="text-xl font-bold mb-4">今日の目標を設定</h2>
+
+              <label className="block mb-2">教科</label>
+              <select
+                value={goalSubject}
+                onChange={(e) => setGoalSubject(e.target.value)}
+                className="w-full p-2 mb-4 bg-gray-700 rounded"
+              >
+                <option value="">選択してください</option>
+                {subjects.map((subj) => (
+                  <option key={subj} value={subj}>
+                    {subj}
+                  </option>
+                ))}
+              </select>
+
+              <label className="block mb-2">目標時間（分）</label>
+              <input
+                type="number"
+                value={dailyGoal}
+                onChange={(e) => setDailyGoal(Number(e.target.value))}
+                className="w-full p-2 mb-4 bg-gray-700 rounded"
+              />
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsGoalSettingOpen(false)}
+                  className="flex-1 bg-green-500 p-2 rounded"
+                >
+                  保存
+                </button>
+                <button
+                  onClick={() => setIsGoalSettingOpen(false)}
+                  className="flex-1 bg-red-500 p-2 rounded"
+                >
+                  キャンセル
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
+    );
 }
