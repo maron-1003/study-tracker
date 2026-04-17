@@ -347,6 +347,9 @@ export default function StudyTracker({ user, onLogout }) {
   selectedRecords.forEach((r) => {
     dailyTotals[r.type] = (dailyTotals[r.type] || 0) + r.minutes;
   });
+  
+  console.log("selectedRecords", selectedRecords);
+  console.log("dailyTotals", dailyTotals);
 
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
