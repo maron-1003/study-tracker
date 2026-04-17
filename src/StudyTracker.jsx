@@ -71,9 +71,7 @@ export default function StudyTracker({ user, onLogout }) {
 
   const [dailyMemo, setDailyMemo] = useState({});
   const [subjectMemo, setSubjectMemo] = useState({});
-  const [dailyGoal, setDailyGoal] = useState(120);
 
-  const [goalSubject, setGoalSubject] = useState("");
   const [isGoalSettingOpen, setIsGoalSettingOpen] = useState(false);
   const [goalAchieved, setGoalAchieved] = useState(false);
 
