@@ -74,6 +74,7 @@ export default function StudyTracker({ user, onLogout }) {
 
   const [isGoalSettingOpen, setIsGoalSettingOpen] = useState(false);
   const [goalAchieved, setGoalAchieved] = useState(false);
+  const [goalTriggered, setGoalTriggered] = useState(false);
 
   const [goalSubject, setGoalSubject] = useState(
     localStorage.getItem("goalSubject") || ""
@@ -440,21 +441,29 @@ export default function StudyTracker({ user, onLogout }) {
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
   useEffect(() => {
-    if (!goalSubject) return;
-    if (goalAchieved) return;
+    const dailyTotals = getDailyTotals(records);
 
-    const subjectMinutes = dailyTotals[goalSubject] || 0;
+    // goalSubject がある → 科目別チェック
+    if (goalSubject) {
+      const subjectMinutes = dailyTotals[goalSubject] || 0;
 
-    if (subjectMinutes >= dailyGoal) {
-      setGoalAchieved(true);
+      if (subjectMinutes >= dailyGoal && !goalTriggered) {
+        console.log("🎉【DEBUG】科目別目標達成トリガー発火！！");
+        setGoalAchieved(true);
+        setGoalTriggered(true); // ← これで再発火しない
+      }
+      return;
     }
-  }, [selectedRecords, goalSubject, dailyGoal]);
 
-  useEffect(() => {
-    localStorage.setItem("goalSubject", goalSubject);
-    localStorage.setItem("dailyGoal", dailyGoal);
-  }, [goalSubject, dailyGoal]);
+    // goalSubject が空 → 日別チェック
+    const total = dailyTotals[selectedDate] || 0;
 
+    if (total >= dailyGoal && !goalTriggered) {
+      console.log("🎉【DEBUG】日別目標達成トリガー発火！！");
+      setGoalAchieved(true);
+      setGoalTriggered(true); // ← これで再発火しない
+    }
+  }, [records, selectedDate, goalSubject, dailyGoal]);
 
   const colorMap = {
     英語: "#3b82f6",
