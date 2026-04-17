@@ -595,10 +595,10 @@ export default function StudyTracker({ user, onLogout }) {
           ></div>
         </div>
 
-
         <p className="mt-2 text-gray-300">
-          {goalSubject ? `${goalSubject}：` : ""} {todayTotal} / {dailyGoal} 分
+          {goalSubject ? `${goalSubject}：` : ""} {subjectMinutes} / {dailyGoal} 分
         </p>
+
         </div>
 
       {/* カレンダーのダークテーマ */}
@@ -895,11 +895,15 @@ export default function StudyTracker({ user, onLogout }) {
               {goalSubject} の目標 {dailyGoal} 分を達成しました！
             </p>
             <button
-              onClick={() => setGoalAchieved(false)}
+              onClick={() => {
+                setGoalAchieved(false);
+                setGoalTriggered(false); // ← ここが超重要
+              }}
               className="px-4 py-2 bg-white text-green-700 font-bold rounded"
             >
               閉じる
             </button>
+
           </div>
         </div>
       )}
