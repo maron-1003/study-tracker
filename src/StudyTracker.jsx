@@ -75,8 +75,6 @@ export default function StudyTracker({ user, onLogout }) {
 
   const [goalSubject, setGoalSubject] = useState("");
   const [isGoalSettingOpen, setIsGoalSettingOpen] = useState(false);
-  const [goalSubject, setGoalSubject] = useState("");
-  const [isGoalSettingOpen, setIsGoalSettingOpen] = useState(false);
   const [goalAchieved, setGoalAchieved] = useState(false);
 
   const timerRef = useRef(null);
