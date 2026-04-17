@@ -55,6 +55,7 @@ function getDailyTotals(records) {
   return daily;
 }
 
+
 export default function StudyTracker({ user, onLogout }) {
   const [studyType, setStudyType] = useState("");
   const [startTime, setStartTime] = useState(null);
@@ -441,29 +442,42 @@ export default function StudyTracker({ user, onLogout }) {
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
   useEffect(() => {
-    const dailyTotals = getDailyTotals(records);
+    if (!isRunning) return;
+    if (goalAchieved) return;
 
-    // goalSubject がある → 科目別チェック
+    // 現在の経過時間（分）
+    const currentMinutes = Math.floor(elapsed / 60);
+
+    // 科目指定あり → 科目別チェック
     if (goalSubject) {
-      const subjectMinutes = dailyTotals[goalSubject] || 0;
+      const subjectMinutes = records
+        .filter((r) => r.type === goalSubject)
+        .reduce((sum, r) => sum + r.minutes, 0);
 
-      if (subjectMinutes >= dailyGoal && !goalTriggered) {
-        console.log("🎉【DEBUG】科目別目標達成トリガー発火！！");
+      const total = subjectMinutes + currentMinutes;
+
+      console.log("【DEBUG】リアルタイム科目別 =", total);
+
+      if (total >= dailyGoal) {
+        console.log("🎉【DEBUG】リアルタイム科目別達成！！");
         setGoalAchieved(true);
-        setGoalTriggered(true); // ← これで再発火しない
       }
       return;
     }
 
-    // goalSubject が空 → 日別チェック
-    const total = dailyTotals[selectedDate] || 0;
+    // 科目指定なし → 日別チェック
+    const dailyTotals = getDailyTotals(records);
+    const todayMinutes = dailyTotals[selectedDate] || 0;
 
-    if (total >= dailyGoal && !goalTriggered) {
-      console.log("🎉【DEBUG】日別目標達成トリガー発火！！");
+    const total = todayMinutes + currentMinutes;
+
+    console.log("【DEBUG】リアルタイム日別 =", total);
+
+    if (total >= dailyGoal) {
+      console.log("🎉【DEBUG】リアルタイム日別達成！！");
       setGoalAchieved(true);
-      setGoalTriggered(true); // ← これで再発火しない
     }
-  }, [records, selectedDate, goalSubject, dailyGoal]);
+  }, [elapsed, isRunning, goalSubject, dailyGoal, records, selectedDate]);
 
   const colorMap = {
     英語: "#3b82f6",
