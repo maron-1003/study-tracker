@@ -380,6 +380,21 @@ export default function StudyTracker({ user, onLogout }) {
     if (studyType === goalSubject) {
       setProgressMinutes(prev => prev + minutes);
     }
+  const addRecord = async ({ subject, minutes, date, start = "--", end = "--" }) => {
+    return await supabase
+      .from("study_records")
+      .insert([
+        {
+          user_id: user.id,
+          subject,
+          minutes,
+          date,
+          start,
+          end,
+        },
+      ])
+      .select();
+  };
 
     const now = new Date();
 
