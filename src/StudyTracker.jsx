@@ -102,6 +102,8 @@ export default function StudyTracker({ user, onLogout }) {
     setIsGoalSettingOpen(true);
     setGoalTriggered(false); // ← これで次の目標が正常に動く
   };
+  
+  const [progressMinutes, setProgressMinutes] = useState(0);
 
 
   // 勉強記録を読み込み
@@ -475,6 +477,7 @@ export default function StudyTracker({ user, onLogout }) {
         ? savedMinutes + currentMinutes
         : savedMinutes;
 
+      setProgressMinutes(total);
       console.log("【DEBUG】科目別 minutes =", total);
 
       if (total >= dailyGoal) {
@@ -585,18 +588,17 @@ export default function StudyTracker({ user, onLogout }) {
           目標を設定する
         </button>
 
-
         <div className="w-full bg-gray-700 h-4 rounded">
           <div
             className="h-4 bg-green-500 rounded"
             style={{
-              width: `${Math.min((subjectMinutes / dailyGoal) * 100, 100)}%`
+              width: `${Math.min((progressMinutes / dailyGoal) * 100, 100)}%`
             }}
           ></div>
         </div>
 
         <p className="mt-2 text-gray-300">
-          {goalSubject ? `${goalSubject}：` : ""} {subjectMinutes} / {dailyGoal} 分
+          {goalSubject ? `${goalSubject}：` : ""} {progressMinutes} / {dailyGoal} 分
         </p>
 
         </div>
@@ -896,14 +898,9 @@ export default function StudyTracker({ user, onLogout }) {
             </p>
             <button
               onClick={() => {
-                // ① ポップアップを閉じる
                 setGoalAchieved(false);
                 setGoalTriggered(false);
-
-                // ② 今日のその教科の記録を削除（リセット）
-                setRecords((prev) =>
-                  prev.filter((r) => !(r.type === goalSubject && r.date === selectedDate))
-                );
+                setProgressMinutes(0); // ← これでバーも数字もリセット
               }}
               className="px-4 py-2 bg-white text-green-700 font-bold rounded"
             >
