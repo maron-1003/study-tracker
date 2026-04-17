@@ -896,8 +896,14 @@ export default function StudyTracker({ user, onLogout }) {
             </p>
             <button
               onClick={() => {
+                // ① ポップアップを閉じる
                 setGoalAchieved(false);
-                setGoalTriggered(false); // ← ここが超重要
+                setGoalTriggered(false);
+
+                // ② 今日のその教科の記録を削除（リセット）
+                setRecords((prev) =>
+                  prev.filter((r) => !(r.type === goalSubject && r.date === selectedDate))
+                );
               }}
               className="px-4 py-2 bg-white text-green-700 font-bold rounded"
             >
