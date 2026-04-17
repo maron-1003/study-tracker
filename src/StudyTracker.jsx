@@ -334,16 +334,11 @@ export default function StudyTracker({ user, onLogout }) {
 
   const selectedRecords = groupedByDate[selectedDate] || [];
 
-  const colorMap = {
-    英語: "#3b82f6",
-    数学: "#10b981",
-    国語: "#f59e0b",
-    理科: "#ef4444",
-    社会: "#8b5cf6",
-    暗記: "#ec4899",
-    自習: "#22c55e",
-  };
-
+  const dailyTotals = {};
+  selectedRecords.forEach((r) => {
+    dailyTotals[r.type] = (dailyTotals[r.type] || 0) + r.minutes;
+  });
+  
   const dailyChartData = {
     labels: Object.keys(dailyTotals),
     datasets: [
@@ -354,6 +349,16 @@ export default function StudyTracker({ user, onLogout }) {
         ),
       },
     ],
+  };
+
+  const colorMap = {
+    英語: "#3b82f6",
+    数学: "#10b981",
+    国語: "#f59e0b",
+    理科: "#ef4444",
+    社会: "#8b5cf6",
+    暗記: "#ec4899",
+    自習: "#22c55e",
   };
 
   const getWeeklyTotal = () => {
@@ -380,11 +385,7 @@ export default function StudyTracker({ user, onLogout }) {
       },
     ],
   };
-  const dailyTotals = {};
-  selectedRecords.forEach((r) => {
-    dailyTotals[r.type] = (dailyTotals[r.type] || 0) + r.minutes;
-  });
-  
+
   const dailyTotalsAll = getDailyTotals(records);
   const lineChartData = {
     labels: Object.keys(dailyTotalsAll),
