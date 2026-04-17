@@ -463,57 +463,22 @@ export default function StudyTracker({ user, onLogout }) {
   useEffect(() => {
     if (goalAchieved || goalTriggered) return;
 
-    // ★ 目標変更直後は達成判定しない
-    if (justChangedGoal) {
-      setProgressMinutes(0);
-      setGoalAchieved(false);
-      setGoalTriggered(false);
-      setJustChangedGoal(false);
-      return;
-    }
-
-    const dailyTotals = getDailyTotals(records);
-    const subjectTotals = getSubjectTotals(records);
-
+    // 現在の経過時間（分）
     const currentMinutes = Math.floor(elapsed / 60);
 
-    // 科目指定あり → 科目別チェック
-    if (goalSubject) {
-      const savedMinutes = subjectTotals[goalSubject] || 0;
+    // ★ ゲージは「今増えた分だけ」
+    setProgressMinutes(currentMinutes);
 
-      const total =
-        studyType === goalSubject
-          ? savedMinutes + currentMinutes
-          : savedMinutes;
-
-      setProgressMinutes(total);
-
-      if (total >= dailyGoal) {
-        setGoalAchieved(true);
-        setGoalTriggered(true);
-      }
-      return;
-    }
-
-    // 科目指定なし → 日別チェック
-    const savedToday = dailyTotals[selectedDate] || 0;
-    const total = savedToday + currentMinutes;
-
-    setProgressMinutes(total);
-
-    if (total >= dailyGoal) {
+    // ★ 達成判定も「今増えた分だけ」
+    if (currentMinutes >= dailyGoal) {
       setGoalAchieved(true);
       setGoalTriggered(true);
+
+      // ★ エフェクト（必要ならここに）
+      // setShowEffect(true);
+      // setTimeout(() => setShowEffect(false), 2000);
     }
-  }, [
-    records,
-    selectedDate,
-    goalSubject,
-    dailyGoal,
-    elapsed,
-    studyType,
-    justChangedGoal
-  ]);
+  }, [elapsed, dailyGoal, goalAchieved, goalTriggered]);
 
   const colorMap = {
     英語: "#3b82f6",
