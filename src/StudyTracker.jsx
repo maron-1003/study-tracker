@@ -155,6 +155,78 @@ export default function StudyTracker({ user, onLogout }) {
     loadDailyMemo();
   }, [user]);
 
+  // --- ここまでの import はそのまま ---
+
+  // 勉強記録を読み込み
+  useEffect(() => {
+    if (!user) return;
+
+    const loadRecords = async () => {
+      const { data, error } = await supabase
+        .from("study_records")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
+
+      if (!error && data) {
+        const converted = data.map((r) => ({
+          id: r.id,                     // ← 追加
+          type: r.subject,
+          minutes: r.minutes,
+          date: r.date,
+          start: r.start || "--",
+          end: r.end || "--",
+          fullDate: r.created_at,
+        }));
+        setRecords(converted);
+      }
+    };
+
+    loadRecords();
+  }, [user]);
+
+  // subjects を読み込み
+  useEffect(() => {
+    if (!user) return;
+
+    const loadSubjects = async () => {
+      const { data, error } = await supabase
+        .from("subjects")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("deleted", false);
+
+      if (!error && data) {
+        const custom = data.map((s) => s.name);
+        setSubjects([...baseSubjects, ...custom]);
+      }
+    };
+
+    loadSubjects();
+  }, [user]);
+
+  // dailyMemo を読み込み
+  useEffect(() => {
+    if (!user) return;
+
+    const loadDailyMemo = async () => {
+      const { data, error } = await supabase
+        .from("daily_memo")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (!error && data) {
+        const memoObj = {};
+        data.forEach((m) => {
+          memoObj[m.date] = m.memo;
+        });
+        setDailyMemo(memoObj);
+      }
+    };
+
+    loadDailyMemo();
+  }, [user]);
+
   // subjectMemo を読み込み
   useEffect(() => {
     if (!user) return;
@@ -236,6 +308,7 @@ export default function StudyTracker({ user, onLogout }) {
 
     if (!error && data) {
       const converted = data.map((r) => ({
+        id: r.id,                     // ← 追加
         type: r.subject,
         minutes: r.minutes,
         date: r.date,
@@ -257,10 +330,7 @@ export default function StudyTracker({ user, onLogout }) {
     const { error } = await supabase
       .from("study_records")
       .delete()
-      .eq("user_id", user.id)
-      .eq("subject", target.type)
-      .eq("minutes", target.minutes)
-      .eq("date", target.date);
+      .eq("id", target.id);          // ← ここを1行に変更
 
     if (!error) {
       setRecords(records.filter((_, i) => i !== index));
@@ -274,14 +344,6 @@ export default function StudyTracker({ user, onLogout }) {
     }
 
     const now = new Date();
-    const newRecord = {
-      type: studyType,
-      start: "--",
-      end: "--",
-      minutes,
-      date: selectedDate,
-      fullDate: `${selectedDate} ${now.toLocaleTimeString()}`,
-    };
 
     const { data, error } = await supabase
       .from("study_records")
@@ -299,6 +361,7 @@ export default function StudyTracker({ user, onLogout }) {
 
     if (!error && data) {
       const converted = data.map((r) => ({
+        id: r.id,                     // ← 追加
         type: r.subject,
         minutes: r.minutes,
         date: r.date,
@@ -310,8 +373,6 @@ export default function StudyTracker({ user, onLogout }) {
       setRecords((prev) => [...prev, ...converted]);
     }
   };
-
-
 
   const addSubject = async () => {
     if (newSubject.trim() === "") return;
@@ -340,7 +401,6 @@ export default function StudyTracker({ user, onLogout }) {
       setSubjects(subjects.filter((item) => item !== subj));
     }
   };
-
   const saveDailyMemo = async (date, memo) => {
     setDailyMemo((prev) => ({ ...prev, [date]: memo }));
 
