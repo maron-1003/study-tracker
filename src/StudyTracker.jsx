@@ -85,7 +85,7 @@ export default function StudyTracker({ user, onLogout }) {
   const [goalAchieved, setGoalAchieved] = useState(false);
   const [goalTriggered, setGoalTriggered] = useState(false);
 
-  const [goalSubject, setGoalSubject] = useState("");
+  const [goalSubject, setGoalSubject] = useState("国語");
 
   const [dailyGoal, setDailyGoal] = useState(
     Number(localStorage.getItem("dailyGoal")) || 120
@@ -846,8 +846,10 @@ export default function StudyTracker({ user, onLogout }) {
                 onChange={(e) => setGoalSubject(e.target.value)}
                 className="w-full p-2 mb-4 bg-gray-700 rounded"
               >
-                <option value=""></option>
-                {subjects.map((subj) => (
+              <option value="国語">国語</option>
+              {subjects
+                .filter((s) => s !== "国語")
+                .map((subj) => (
                   <option key={subj} value={subj}>
                     {subj}
                   </option>
