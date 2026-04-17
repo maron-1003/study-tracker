@@ -77,6 +77,14 @@ export default function StudyTracker({ user, onLogout }) {
   const [isGoalSettingOpen, setIsGoalSettingOpen] = useState(false);
   const [goalAchieved, setGoalAchieved] = useState(false);
 
+  const [goalSubject, setGoalSubject] = useState(
+    localStorage.getItem("goalSubject") || ""
+  );
+
+  const [dailyGoal, setDailyGoal] = useState(
+    Number(localStorage.getItem("dailyGoal")) || 120
+  );
+
   const timerRef = useRef(null);
 
 
@@ -94,7 +102,7 @@ export default function StudyTracker({ user, onLogout }) {
       if (!error && data) {
         const converted = data.map((r) => ({
           type: r.subject,
-          minutes: r.seconds,
+          minutes: r.minutes,
           date: r.date,
           start: r.start || "--",
           end: r.end || "--",
@@ -218,7 +226,7 @@ export default function StudyTracker({ user, onLogout }) {
       {
         user_id: user.id,
         subject: studyType,
-        seconds: minutes,
+        minutes: minutes,
         date: selectedDate,
         start: newRecord.start,
         end: newRecord.end,
@@ -355,6 +363,10 @@ export default function StudyTracker({ user, onLogout }) {
     }
   }, [selectedRecords, goalSubject, dailyGoal]);
 
+  useEffect(() => {
+    localStorage.setItem("goalSubject", goalSubject);
+    localStorage.setItem("dailyGoal", dailyGoal);
+  }, [goalSubject, dailyGoal]);
 
 
   const colorMap = {
