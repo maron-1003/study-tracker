@@ -105,6 +105,7 @@ export default function StudyTracker({ user, onLogout }) {
   
   const [progressMinutes, setProgressMinutes] = useState(0);
 
+  const [showEffect, setShowEffect] = useState(false);
 
   // 勉強記録を読み込み
   useEffect(() => {
@@ -465,41 +466,70 @@ export default function StudyTracker({ user, onLogout }) {
     const dailyTotals = getDailyTotals(records);
     const subjectTotals = getSubjectTotals(records);
 
-    // 現在の経過時間（分）
     const currentMinutes = Math.floor(elapsed / 60);
 
-    // 科目指定あり → 科目別チェック
-    if (goalSubject) {
-      const savedMinutes = subjectTotals[goalSubject] || 0;
-
-      // 今勉強中の科目が目標科目なら加算
-      const total = studyType === goalSubject
-        ? savedMinutes + currentMinutes
-        : savedMinutes;
+    // ★ ① 総合勉強時間（全教科合計）
+    if (goalSubject === "総合") {
+      const savedToday = dailyTotals[selectedDate] || 0;
+      const total = savedToday + currentMinutes;
 
       setProgressMinutes(total);
-      console.log("【DEBUG】科目別 minutes =", total);
 
       if (total >= dailyGoal) {
-        console.log("🎉【DEBUG】科目別目標達成！！");
         setGoalAchieved(true);
-        setGoalTriggered(true); // ← 再発火防止
+        setGoalTriggered(true);
+
+        // ★ エフェクト発火
+        setShowEffect(true);
+        setTimeout(() => setShowEffect(false), 2000);
       }
       return;
     }
 
-    // 科目指定なし → 日別チェック
+    // ★ ② 科目指定あり（総合以外）
+    if (goalSubject && goalSubject !== "総合") {
+      const savedMinutes = subjectTotals[goalSubject] || 0;
+
+      const total =
+        studyType === goalSubject
+          ? savedMinutes + currentMinutes
+          : savedMinutes;
+
+      setProgressMinutes(total);
+
+      if (total >= dailyGoal) {
+        setGoalAchieved(true);
+        setGoalTriggered(true);
+
+        // ★ エフェクト発火
+        setShowEffect(true);
+        setTimeout(() => setShowEffect(false), 2000);
+      }
+      return;
+    }
+
+    // ★ ③ 科目指定なし（日別）
     const savedToday = dailyTotals[selectedDate] || 0;
     const total = savedToday + currentMinutes;
 
-    console.log("【DEBUG】日別 minutes =", total);
+    setProgressMinutes(total);
 
     if (total >= dailyGoal) {
-      console.log("🎉【DEBUG】日別目標達成！！");
       setGoalAchieved(true);
-      setGoalTriggered(true); // ← 再発火防止
+      setGoalTriggered(true);
+
+      // ★ エフェクト発火
+      setShowEffect(true);
+      setTimeout(() => setShowEffect(false), 2000);
     }
-  }, [records, selectedDate, goalSubject, dailyGoal, elapsed, studyType]);
+  }, [
+    records,
+    selectedDate,
+    goalSubject,
+    dailyGoal,
+    elapsed,
+    studyType
+  ]);
 
   const colorMap = {
     英語: "#3b82f6",
