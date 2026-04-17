@@ -75,6 +75,9 @@ export default function StudyTracker({ user, onLogout }) {
 
   const [goalSubject, setGoalSubject] = useState("");
   const [isGoalSettingOpen, setIsGoalSettingOpen] = useState(false);
+  const [goalSubject, setGoalSubject] = useState("");
+  const [isGoalSettingOpen, setIsGoalSettingOpen] = useState(false);
+  const [goalAchieved, setGoalAchieved] = useState(false);
 
   const timerRef = useRef(null);
 
@@ -343,6 +346,17 @@ export default function StudyTracker({ user, onLogout }) {
 
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
+  useEffect(() => {
+    if (!goalSubject) return; // 目標が設定されていない
+    if (goalAchieved) return; // すでに達成済み
+
+    const subjectMinutes = dailyTotals[goalSubject] || 0;
+
+    if (subjectMinutes >= dailyGoal) {
+      setGoalAchieved(true);
+    }
+  }, [dailyTotals, goalSubject, dailyGoal]);
+
 
   const colorMap = {
     英語: "#3b82f6",
@@ -353,6 +367,7 @@ export default function StudyTracker({ user, onLogout }) {
     暗記: "#ec4899",
     自習: "#22c55e",
   };
+
   const dailyChartData = {
     labels: Object.keys(dailyTotals),
     datasets: [
@@ -726,9 +741,27 @@ export default function StudyTracker({ user, onLogout }) {
                 </button>
               </div>
             </div>
+            
           </div>
         )}
 
+        {goalAchieved && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center">
+          <div className="bg-green-600 p-8 rounded-xl shadow-xl text-center animate-bounce">
+            <h2 className="text-3xl font-bold mb-4">🎉 達成！！ 🎉</h2>
+            <p className="text-lg mb-4">
+              {goalSubject} の目標 {dailyGoal} 分を達成しました！
+            </p>
+            <button
+              onClick={() => setGoalAchieved(false)}
+              className="px-4 py-2 bg-white text-green-700 font-bold rounded"
+            >
+              閉じる
+            </button>
+          </div>
+        </div>
+      )}
       </div>
+      
     );
 }
