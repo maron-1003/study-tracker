@@ -218,14 +218,6 @@ export default function StudyTracker({ user, onLogout }) {
 
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
-  // 目標教科の今日の合計を progressMinutes に反映
-  useEffect(() => {
-    const total = selectedRecords
-      .filter((r) => r.type === goalSubject)
-      .reduce((sum, r) => sum + r.minutes, 0);
-    setProgressMinutes(total);
-  }, [selectedRecords, goalSubject]);
-
   // 目標達成判定
   useEffect(() => {
     if (progressMinutes >= dailyGoal && !goalTriggered) {
@@ -373,6 +365,10 @@ export default function StudyTracker({ user, onLogout }) {
       start: startStr,
       end: endStr,
     });
+    // ★ 目標教科なら progressMinutes を積み上げる
+    if (studyType === goalSubject) {
+      setProgressMinutes(prev => prev + minutes);
+    }
 
     setStartTime(null);
     setElapsed(0);
@@ -402,7 +398,13 @@ export default function StudyTracker({ user, onLogout }) {
       minutes,
       date: selectedDate,
     });
+
+    // ★ 目標教科なら progressMinutes を積み上げる
+    if (studyType === goalSubject) {
+      setProgressMinutes(prev => prev + minutes);
+    }
   };
+
 
   const addSubject = async () => {
     if (newSubject.trim() === "") return;
@@ -773,12 +775,16 @@ export default function StudyTracker({ user, onLogout }) {
             />
 
             <div className="flex gap-2">
-              <button
-                onClick={() => setIsGoalSettingOpen(false)}
-                className="flex-1 bg-green-500 p-2 rounded"
-              >
-                保存
-              </button>
+            <button
+              onClick={() => {
+                setProgressMinutes(0);   // ← ここでリセット
+                setGoalTriggered(false);
+                setIsGoalSettingOpen(false);
+              }}
+              className="flex-1 bg-green-500 p-2 rounded"
+            >
+              保存
+            </button>
               <button
                 onClick={() => setIsGoalSettingOpen(false)}
                 className="flex-1 bg-red-500 p-2 rounded"
