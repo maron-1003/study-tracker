@@ -313,6 +313,7 @@ export default function StudyTracker({ user, onLogout }) {
       fullDate: `${selectedDate} ${end.toLocaleTimeString()}`,
     };
 
+    // ★ Supabase に保存
     const { data, error } = await supabase
       .from("study_records")
       .insert([
@@ -329,7 +330,7 @@ export default function StudyTracker({ user, onLogout }) {
 
     if (!error && data) {
       const converted = data.map((r) => ({
-        id: r.id,                     // ← 追加
+        id: r.id,
         type: r.subject,
         minutes: r.minutes,
         date: r.date,
@@ -341,6 +342,13 @@ export default function StudyTracker({ user, onLogout }) {
       setRecords((prev) => [...prev, ...converted]);
     }
 
+    // ★★★ ここが重要 ★★★
+    // 目標の教科と一致していたらゲージを増やす
+    if (studyType === goalSubject) {
+      setProgressMinutes((prev) => prev + minutes);
+    }
+
+    // タイマーリセット
     setStartTime(null);
     setElapsed(0);
   };
@@ -461,24 +469,15 @@ export default function StudyTracker({ user, onLogout }) {
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
   useEffect(() => {
-    if (goalAchieved || goalTriggered) return;
-
-    // 経過時間（分）
-    const currentMinutes = Math.floor(elapsed / 60);
-
-    // ★ ゲージは「今増えた分だけ」
-    setProgressMinutes(currentMinutes);
-
-    // ★ 達成判定
-    if (currentMinutes >= dailyGoal) {
+    if (progressMinutes >= dailyGoal && !goalTriggered) {
       setGoalAchieved(true);
       setGoalTriggered(true);
 
-      // ★ エフェクト（必要ならここ）
+      // エフェクト
       // setShowEffect(true);
       // setTimeout(() => setShowEffect(false), 2000);
     }
-  }, [elapsed, dailyGoal, goalAchieved, goalTriggered]);
+  }, [progressMinutes, dailyGoal, goalTriggered]);
 
   const colorMap = {
     英語: "#3b82f6",
