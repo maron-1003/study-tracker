@@ -54,6 +54,7 @@ function getDailyTotals(records) {
   });
   return daily;
 }
+
 function getSubjectTotals(records) {
   const subjects = {};
   records.forEach((r) => {
@@ -62,7 +63,6 @@ function getSubjectTotals(records) {
   });
   return subjects;
 }
-
 
 export default function StudyTracker({ user, onLogout }) {
   const [studyType, setStudyType] = useState("");
@@ -86,25 +86,23 @@ export default function StudyTracker({ user, onLogout }) {
   const [goalTriggered, setGoalTriggered] = useState(false);
 
   const [goalSubject, setGoalSubject] = useState("国語");
-
   const [dailyGoal, setDailyGoal] = useState(
     Number(localStorage.getItem("dailyGoal")) || 120
   );
 
-  const timerRef = useRef(null);
-  
-  const subjectTotals = getSubjectTotals(records);
-  const subjectMinutes = subjectTotals[goalSubject] || 0;
-  
-  const openGoalSetting = () => {
-    setIsGoalSettingOpen(true);
-    setGoalTriggered(false); // ← これで次の目標が正常に動く
-  };
-  
   const [progressMinutes, setProgressMinutes] = useState(0);
 
-  const [showEffect, setShowEffect] = useState(false);
+  const timerRef = useRef(null);
 
+  const subjectTotals = getSubjectTotals(records);
+  const subjectMinutes = subjectTotals[goalSubject] || 0;
+
+  const openGoalSetting = () => {
+    setIsGoalSettingOpen(true);
+    setGoalTriggered(false);
+  };
+
+  const [showEffect, setShowEffect] = useState(false);
   const [justChangedGoal, setJustChangedGoal] = useState(false);
 
   // 勉強記録を読み込み
@@ -120,78 +118,7 @@ export default function StudyTracker({ user, onLogout }) {
 
       if (!error && data) {
         const converted = data.map((r) => ({
-          type: r.subject,
-          minutes: r.minutes,
-          date: r.date,
-          start: r.start || "--",
-          end: r.end || "--",
-          fullDate: r.created_at,
-        }));
-        setRecords(converted);
-      }
-    };
-
-    loadRecords();
-  }, [user]);
-
-  // subjects を読み込み
-  useEffect(() => {
-    if (!user) return;
-
-    const loadSubjects = async () => {
-      const { data, error } = await supabase
-        .from("subjects")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("deleted", false);
-
-      if (!error && data) {
-        const custom = data.map((s) => s.name);
-        setSubjects([...baseSubjects, ...custom]);
-      }
-    };
-
-    loadSubjects();
-  }, [user]);
-
-  // dailyMemo を読み込み
-  useEffect(() => {
-    if (!user) return;
-
-    const loadDailyMemo = async () => {
-      const { data, error } = await supabase
-        .from("daily_memo")
-        .select("*")
-        .eq("user_id", user.id);
-
-      if (!error && data) {
-        const memoObj = {};
-        data.forEach((m) => {
-          memoObj[m.date] = m.memo;
-        });
-        setDailyMemo(memoObj);
-      }
-    };
-
-    loadDailyMemo();
-  }, [user]);
-
-  // --- ここまでの import はそのまま ---
-
-  // 勉強記録を読み込み
-  useEffect(() => {
-    if (!user) return;
-
-    const loadRecords = async () => {
-      const { data, error } = await supabase
-        .from("study_records")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: true });
-
-      if (!error && data) {
-        const converted = data.map((r) => ({
-          id: r.id,                     // ← 追加
+          id: r.id,
           type: r.subject,
           minutes: r.minutes,
           date: r.date,
@@ -270,210 +197,12 @@ export default function StudyTracker({ user, onLogout }) {
     loadSubjectMemo();
   }, [user]);
 
-  const handleStart = () => {
-    if (!studyType) {
-      alert("勉強内容を選択してください");
-      return;
-    }
-    const now = new Date();
-    setStartTime(now);
-    setIsRunning(true);
+  // 目標時間をローカルストレージに保存
+  useEffect(() => {
+    localStorage.setItem("dailyGoal", String(dailyGoal));
+  }, [dailyGoal]);
 
-    timerRef.current = setInterval(() => {
-      setElapsed((prev) => prev + 1);
-    }, 1000);
-  };
-
-  const handlePause = () => {
-    clearInterval(timerRef.current);
-    setIsRunning(false);
-  };
-
-  const handleStop = async () => {
-    if (!startTime) return;
-
-    clearInterval(timerRef.current);
-    setIsRunning(false);
-
-    const end = new Date();
-    const minutes = Math.floor(elapsed / 60);
-
-    const newRecord = {
-      type: studyType,
-      start: startTime.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      end: end.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      minutes,
-      date: selectedDate,
-      fullDate: `${selectedDate} ${end.toLocaleTimeString()}`,
-    };
-
-    const { data, error } = await supabase
-      .from("study_records")
-      .insert([
-        {
-          user_id: user.id,
-          subject: studyType,
-          minutes: minutes,
-          date: selectedDate,
-          start: newRecord.start,
-          end: newRecord.end,
-        },
-      ])
-      .select();
-
-    if (!error && data) {
-      const converted = data.map((r) => ({
-        id: r.id,
-        type: r.subject,
-        minutes: r.minutes,
-        date: r.date,
-        start: r.start || "--",
-        end: r.end || "--",
-        fullDate: r.created_at,
-      }));
-
-      setRecords((prev) => [...prev, ...converted]);
-    }
-    console.log("studyType =", studyType);
-    console.log("goalSubject =", goalSubject);
-
-    // ★★★ ここがゲージを増やす本体 ★★★
-    if (studyType === goalSubject) {
-      setProgressMinutes(prev => prev + minutes);
-    }
-
-    setStartTime(null);
-    setElapsed(0);
-  };
-
-  const deleteRecord = async (index) => {
-    const target = records[index];
-
-    const { error } = await supabase
-      .from("study_records")
-      .delete()
-      .eq("id", target.id);          // ← ここを1行に変更
-
-    if (!error) {
-      setRecords(records.filter((_, i) => i !== index));
-    }
-  };
-
-  const addTestTime = async (minutes) => {
-    if (!studyType) {
-      alert("勉強内容を選択してください");
-      return;
-    }
-
-    await addRecord({
-      subject: studyType,
-      minutes,
-      date: selectedDate,
-    });
-
-    if (studyType === goalSubject) {
-      setProgressMinutes(prev => prev + minutes);
-    }
-  const addRecord = async ({ subject, minutes, date, start = "--", end = "--" }) => {
-    return await supabase
-      .from("study_records")
-      .insert([
-        {
-          user_id: user.id,
-          subject,
-          minutes,
-          date,
-          start,
-          end,
-        },
-      ])
-      .select();
-  };
-
-    const now = new Date();
-
-    const { data, error } = await supabase
-      .from("study_records")
-      .insert([
-        {
-          user_id: user.id,
-          subject: studyType,
-          minutes: minutes,
-          date: selectedDate,
-          start: "--",
-          end: "--",
-        },
-      ])
-      .select();
-
-    if (!error && data) {
-      const converted = data.map((r) => ({
-        id: r.id,                     // ← 追加
-        type: r.subject,
-        minutes: r.minutes,
-        date: r.date,
-        start: r.start || "--",
-        end: r.end || "--",
-        fullDate: r.created_at,
-      }));
-
-      setRecords((prev) => [...prev, ...converted]);
-    }
-  };
-
-  const addSubject = async () => {
-    if (newSubject.trim() === "") return;
-    if (subjects.includes(newSubject)) return;
-
-    const { error } = await supabase.from("subjects").insert({
-      user_id: user.id,
-      name: newSubject,
-      deleted: false,
-    });
-
-    if (!error) {
-      setSubjects([...subjects, newSubject]);
-      setNewSubject("");
-    }
-  };
-
-  const deleteSubject = async (subj) => {
-    const { error } = await supabase
-      .from("subjects")
-      .update({ deleted: true })
-      .eq("user_id", user.id)
-      .eq("name", subj);
-
-    if (!error) {
-      setSubjects(subjects.filter((item) => item !== subj));
-    }
-  };
-  const saveDailyMemo = async (date, memo) => {
-    setDailyMemo((prev) => ({ ...prev, [date]: memo }));
-
-    await supabase.from("daily_memo").upsert({
-      user_id: user.id,
-      date,
-      memo,
-    });
-  };
-
-  const saveSubjectMemo = async (subject, memo) => {
-    setSubjectMemo((prev) => ({ ...prev, [subject]: memo }));
-
-    await supabase.from("subject_memo").upsert({
-      user_id: user.id,
-      subject,
-      memo,
-    });
-  };
-
+  // 日付ごとのグループ
   const groupedByDate = records.reduce((acc, r) => {
     if (!acc[r.date]) acc[r.date] = [];
     acc[r.date].push(r);
@@ -486,18 +215,22 @@ export default function StudyTracker({ user, onLogout }) {
   selectedRecords.forEach((r) => {
     dailyTotals[r.type] = (dailyTotals[r.type] || 0) + r.minutes;
   });
-  
-  console.log("selectedRecords", selectedRecords);
-  console.log("dailyTotals", dailyTotals);
 
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
+  // 目標教科の今日の合計を progressMinutes に反映
+  useEffect(() => {
+    const total = selectedRecords
+      .filter((r) => r.type === goalSubject)
+      .reduce((sum, r) => sum + r.minutes, 0);
+    setProgressMinutes(total);
+  }, [selectedRecords, goalSubject]);
+
+  // 目標達成判定
   useEffect(() => {
     if (progressMinutes >= dailyGoal && !goalTriggered) {
       setGoalAchieved(true);
       setGoalTriggered(true);
-
-      // エフェクト
       // setShowEffect(true);
       // setTimeout(() => setShowEffect(false), 2000);
     }
@@ -565,12 +298,166 @@ export default function StudyTracker({ user, onLogout }) {
     ],
   };
 
+  // 共通のレコード追加関数
+  const addRecord = async ({ subject, minutes, date, start = "--", end = "--" }) => {
+    const { data, error } = await supabase
+      .from("study_records")
+      .insert([
+        {
+          user_id: user.id,
+          subject,
+          minutes,
+          date,
+          start,
+          end,
+        },
+      ])
+      .select();
+
+    if (!error && data) {
+      const converted = data.map((r) => ({
+        id: r.id,
+        type: r.subject,
+        minutes: r.minutes,
+        date: r.date,
+        start: r.start || "--",
+        end: r.end || "--",
+        fullDate: r.created_at,
+      }));
+
+      setRecords((prev) => [...prev, ...converted]);
+    }
+  };
+
+  const handleStart = () => {
+    if (!studyType) {
+      alert("勉強内容を選択してください");
+      return;
+    }
+    const now = new Date();
+    setStartTime(now);
+    setIsRunning(true);
+
+    timerRef.current = setInterval(() => {
+      setElapsed((prev) => prev + 1);
+    }, 1000);
+  };
+
+  const handlePause = () => {
+    clearInterval(timerRef.current);
+    setIsRunning(false);
+  };
+
+  const handleStop = async () => {
+    if (!startTime) return;
+
+    clearInterval(timerRef.current);
+    setIsRunning(false);
+
+    const end = new Date();
+    const minutes = Math.floor(elapsed / 60);
+
+    const startStr = startTime.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const endStr = end.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    await addRecord({
+      subject: studyType,
+      minutes,
+      date: selectedDate,
+      start: startStr,
+      end: endStr,
+    });
+
+    setStartTime(null);
+    setElapsed(0);
+  };
+
+  const deleteRecord = async (index) => {
+    const target = records[index];
+
+    const { error } = await supabase
+      .from("study_records")
+      .delete()
+      .eq("id", target.id);
+
+    if (!error) {
+      setRecords(records.filter((_, i) => i !== index));
+    }
+  };
+
+  const addTestTime = async (minutes) => {
+    if (!studyType) {
+      alert("勉強内容を選択してください");
+      return;
+    }
+
+    await addRecord({
+      subject: studyType,
+      minutes,
+      date: selectedDate,
+    });
+  };
+
+  const addSubject = async () => {
+    if (newSubject.trim() === "") return;
+    if (subjects.includes(newSubject)) return;
+
+    const { error } = await supabase.from("subjects").insert({
+      user_id: user.id,
+      name: newSubject,
+      deleted: false,
+    });
+
+    if (!error) {
+      setSubjects([...subjects, newSubject]);
+      setNewSubject("");
+    }
+  };
+
+  const deleteSubject = async (subj) => {
+    const { error } = await supabase
+      .from("subjects")
+      .update({ deleted: true })
+      .eq("user_id", user.id)
+      .eq("name", subj);
+
+    if (!error) {
+      setSubjects(subjects.filter((item) => item !== subj));
+    }
+  };
+
+  const saveDailyMemo = async (date, memo) => {
+    setDailyMemo((prev) => ({ ...prev, [date]: memo }));
+
+    await supabase.from("daily_memo").upsert({
+      user_id: user.id,
+      date,
+      memo,
+    });
+  };
+
+  const saveSubjectMemo = async (subject, memo) => {
+    setSubjectMemo((prev) => ({ ...prev, [subject]: memo }));
+
+    await supabase.from("subject_memo").upsert({
+      user_id: user.id,
+      subject,
+      memo,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center">
       {/* ヘッダー */}
       <div className="w-full max-w-6xl flex justify-between items-center mb-6">
         <h2 className="text-xl text-blue-300 font-bold">
-        ようこそ、{user.nickname} さん
+          ようこそ、{user.nickname} さん
         </h2>
 
         <button
@@ -580,8 +467,9 @@ export default function StudyTracker({ user, onLogout }) {
           ログアウト
         </button>
       </div>
-        
-    <div className="w-full max-w-6xl bg-gray-800 p-4 rounded mb-6">
+
+      {/* 今日の目標 */}
+      <div className="w-full max-w-6xl bg-gray-800 p-4 rounded mb-6">
         <h3 className="text-lg font-bold mb-2">今日の目標</h3>
         <button
           onClick={openGoalSetting}
@@ -594,16 +482,19 @@ export default function StudyTracker({ user, onLogout }) {
           <div
             className="h-4 bg-green-500 rounded"
             style={{
-              width: `${Math.min((progressMinutes / dailyGoal) * 100, 100)}%`
+              width: `${Math.min(
+                (progressMinutes / dailyGoal) * 100,
+                100
+              )}%`,
             }}
           ></div>
         </div>
 
         <p className="mt-2 text-gray-300">
-          {goalSubject ? `${goalSubject}：` : ""} {progressMinutes} / {dailyGoal} 分
+          {goalSubject ? `${goalSubject}：` : ""} {progressMinutes} /{" "}
+          {dailyGoal} 分
         </p>
-
-        </div>
+      </div>
 
       {/* カレンダーのダークテーマ */}
       <style>{`
@@ -692,7 +583,10 @@ export default function StudyTracker({ user, onLogout }) {
             placeholder="教科を追加（例：技術）"
             className="flex-1 p-2 rounded bg-gray-700"
           />
-          <button onClick={addSubject} className="px-4 py-2 bg-blue-500 rounded">
+          <button
+            onClick={addSubject}
+            className="px-4 py-2 bg-blue-500 rounded"
+          >
             追加
           </button>
         </div>
@@ -776,6 +670,7 @@ export default function StudyTracker({ user, onLogout }) {
         </div>
       </div>
 
+      {/* 今日のメモ */}
       <div className="mt-6 w-full max-w-6xl">
         <h3 className="text-lg mb-2">今日のメモ</h3>
         <textarea
@@ -787,6 +682,7 @@ export default function StudyTracker({ user, onLogout }) {
         />
       </div>
 
+      {/* 記録一覧 */}
       <div className="w-full max-w-6xl mt-12">
         <h2 className="text-2xl font-bold mb-4 text-blue-300">
           {selectedDate} の記録一覧
@@ -845,17 +741,19 @@ export default function StudyTracker({ user, onLogout }) {
           <Line data={lineChartData} />
         </div>
       </div>
-          {isGoalSettingOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-gray-800 p-6 rounded-lg w-80">
-              <h2 className="text-xl font-bold mb-4">今日の目標を設定</h2>
 
-              <label className="block mb-2">教科</label>
-              <select
-                value={goalSubject}
-                onChange={(e) => setGoalSubject(e.target.value)}
-                className="w-full p-2 mb-4 bg-gray-700 rounded"
-              >
+      {/* 目標設定モーダル */}
+      {isGoalSettingOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-gray-800 p-6 rounded-lg w-80">
+            <h2 className="text-xl font-bold mb-4">今日の目標を設定</h2>
+
+            <label className="block mb-2">教科</label>
+            <select
+              value={goalSubject}
+              onChange={(e) => setGoalSubject(e.target.value)}
+              className="w-full p-2 mb-4 bg-gray-700 rounded"
+            >
               <option value="国語">国語</option>
               {subjects
                 .filter((s) => s !== "国語")
@@ -864,36 +762,36 @@ export default function StudyTracker({ user, onLogout }) {
                     {subj}
                   </option>
                 ))}
-              </select>
+            </select>
 
-              <label className="block mb-2">目標時間（分）</label>
-              <input
-                type="number"
-                value={dailyGoal}
-                onChange={(e) => setDailyGoal(Number(e.target.value))}
-                className="w-full p-2 mb-4 bg-gray-700 rounded"
-              />
+            <label className="block mb-2">目標時間（分）</label>
+            <input
+              type="number"
+              value={dailyGoal}
+              onChange={(e) => setDailyGoal(Number(e.target.value))}
+              className="w-full p-2 mb-4 bg-gray-700 rounded"
+            />
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setIsGoalSettingOpen(false)}
-                  className="flex-1 bg-green-500 p-2 rounded"
-                >
-                  保存
-                </button>
-                <button
-                  onClick={() => setIsGoalSettingOpen(false)}
-                  className="flex-1 bg-red-500 p-2 rounded"
-                >
-                  キャンセル
-                </button>
-              </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsGoalSettingOpen(false)}
+                className="flex-1 bg-green-500 p-2 rounded"
+              >
+                保存
+              </button>
+              <button
+                onClick={() => setIsGoalSettingOpen(false)}
+                className="flex-1 bg-red-500 p-2 rounded"
+              >
+                キャンセル
+              </button>
             </div>
-            
           </div>
-        )}
+        </div>
+      )}
 
-        {goalAchieved && (
+      {/* 達成モーダル */}
+      {goalAchieved && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center">
           <div className="bg-green-600 p-8 rounded-xl shadow-xl text-center animate-bounce">
             <h2 className="text-3xl font-bold mb-4">🎉 達成！！ 🎉</h2>
@@ -904,17 +802,14 @@ export default function StudyTracker({ user, onLogout }) {
               onClick={() => {
                 setGoalAchieved(false);
                 setGoalTriggered(false);
-                setProgressMinutes(0); // ← これでバーも数字もリセット
               }}
               className="px-4 py-2 bg-white text-green-700 font-bold rounded"
             >
               閉じる
             </button>
-
           </div>
         </div>
       )}
-      </div>
-      
-    );
+    </div>
+  );
 }
