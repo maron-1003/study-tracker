@@ -371,6 +371,20 @@ export default function StudyTracker({ user, onLogout }) {
       return;
     }
 
+    // ★ Supabase に記録を追加
+    await addRecord({
+      subject: studyType,
+      minutes,
+      date: selectedDate,
+    });
+
+    // ★★★ ここがゲージを増やす本体 ★★★
+    if (studyType === goalSubject) {
+      setProgressMinutes(prev => prev + minutes);
+    }
+  };
+
+
     const now = new Date();
 
     const { data, error } = await supabase
