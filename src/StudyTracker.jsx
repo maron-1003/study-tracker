@@ -289,13 +289,13 @@ export default function StudyTracker({ user, onLogout }) {
         {
           user_id: user.id,
           subject: studyType,
-          minutes: minutes,   // ← ★ここを seconds から minutes に修正
+          minutes: minutes,
           date: selectedDate,
           start: "--",
           end: "--",
         },
       ])
-      .select(); // ← ★これがないと data に minutes が返らない
+      .select();
 
     if (!error && data) {
       const converted = data.map((r) => ({
@@ -310,6 +310,7 @@ export default function StudyTracker({ user, onLogout }) {
       setRecords((prev) => [...prev, ...converted]);
     }
   };
+
 
 
   const addSubject = async () => {
