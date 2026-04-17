@@ -313,7 +313,6 @@ export default function StudyTracker({ user, onLogout }) {
       fullDate: `${selectedDate} ${end.toLocaleTimeString()}`,
     };
 
-    // ★ Supabase に保存
     const { data, error } = await supabase
       .from("study_records")
       .insert([
@@ -342,13 +341,11 @@ export default function StudyTracker({ user, onLogout }) {
       setRecords((prev) => [...prev, ...converted]);
     }
 
-    // ★★★ ここが重要 ★★★
-    // 目標の教科と一致していたらゲージを増やす
+    // ★★★ ここがゲージを増やす本体 ★★★
     if (studyType === goalSubject) {
-      setProgressMinutes((prev) => prev + minutes);
+      setProgressMinutes(prev => prev + minutes);
     }
 
-    // タイマーリセット
     setStartTime(null);
     setElapsed(0);
   };
