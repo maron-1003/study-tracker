@@ -99,7 +99,6 @@ export default function StudyTracker({ user, onLogout }) {
 
   const openGoalSetting = () => {
     setIsGoalSettingOpen(true);
-    setGoalTriggered(false);
   };
 
   const [showEffect, setShowEffect] = useState(false);
