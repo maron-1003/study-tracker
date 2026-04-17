@@ -345,15 +345,16 @@ export default function StudyTracker({ user, onLogout }) {
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
   useEffect(() => {
-    if (!goalSubject) return; // 目標が設定されていない
-    if (goalAchieved) return; // すでに達成済み
+    if (!goalSubject) return;
+    if (goalAchieved) return;
 
     const subjectMinutes = dailyTotals[goalSubject] || 0;
 
     if (subjectMinutes >= dailyGoal) {
       setGoalAchieved(true);
     }
-  }, [dailyTotals, goalSubject, dailyGoal]);
+  }, [selectedRecords, goalSubject, dailyGoal]);
+
 
 
   const colorMap = {
