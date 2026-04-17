@@ -220,19 +220,31 @@ export default function StudyTracker({ user, onLogout }) {
       fullDate: `${selectedDate} ${end.toLocaleTimeString()}`,
     };
 
-    const { error } = await supabase.from("study_records").insert([
-      {
-        user_id: user.id,
-        subject: studyType,
-        minutes: minutes,
-        date: selectedDate,
-        start: newRecord.start,
-        end: newRecord.end,
-      },
-    ]);
+    const { data, error } = await supabase
+      .from("study_records")
+      .insert([
+        {
+          user_id: user.id,
+          subject: studyType,
+          minutes: minutes,
+          date: selectedDate,
+          start: newRecord.start,
+          end: newRecord.end,
+        },
+      ])
+      .select();
 
-    if (!error) {
-      setRecords([...records, newRecord]);
+    if (!error && data) {
+      const converted = data.map((r) => ({
+        type: r.subject,
+        minutes: r.minutes,
+        date: r.date,
+        start: r.start || "--",
+        end: r.end || "--",
+        fullDate: r.created_at,
+      }));
+
+      setRecords((prev) => [...prev, ...converted]);
     }
 
     setStartTime(null);
@@ -247,7 +259,7 @@ export default function StudyTracker({ user, onLogout }) {
       .delete()
       .eq("user_id", user.id)
       .eq("subject", target.type)
-      .eq("seconds", target.minutes)
+      .eq("minutes", target.minutes)
       .eq("date", target.date);
 
     if (!error) {
@@ -271,21 +283,34 @@ export default function StudyTracker({ user, onLogout }) {
       fullDate: `${selectedDate} ${now.toLocaleTimeString()}`,
     };
 
-    const { error } = await supabase.from("study_records").insert([
-      {
-        user_id: user.id,
-        subject: studyType,
-        seconds: minutes,
-        date: selectedDate,
-        start: "--",
-        end: "--",
-      },
-    ]);
+    const { data, error } = await supabase
+      .from("study_records")
+      .insert([
+        {
+          user_id: user.id,
+          subject: studyType,
+          minutes: minutes,   // ← ★ここを seconds から minutes に修正
+          date: selectedDate,
+          start: "--",
+          end: "--",
+        },
+      ])
+      .select(); // ← ★これがないと data に minutes が返らない
 
-    if (!error) {
-      setRecords([...records, newRecord]);
+    if (!error && data) {
+      const converted = data.map((r) => ({
+        type: r.subject,
+        minutes: r.minutes,
+        date: r.date,
+        start: r.start || "--",
+        end: r.end || "--",
+        fullDate: r.created_at,
+      }));
+
+      setRecords((prev) => [...prev, ...converted]);
     }
   };
+
 
   const addSubject = async () => {
     if (newSubject.trim() === "") return;
