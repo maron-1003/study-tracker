@@ -105,6 +105,8 @@ export default function StudyTracker({ user, onLogout }) {
 
   const [showEffect, setShowEffect] = useState(false);
 
+  const [justChangedGoal, setJustChangedGoal] = useState(false);
+
   // 勉強記録を読み込み
   useEffect(() => {
     if (!user) return;
