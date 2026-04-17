@@ -340,6 +340,8 @@ export default function StudyTracker({ user, onLogout }) {
 
       setRecords((prev) => [...prev, ...converted]);
     }
+    console.log("studyType =", studyType);
+    console.log("goalSubject =", goalSubject);
 
     // ★★★ ここがゲージを増やす本体 ★★★
     if (studyType === goalSubject) {
