@@ -85,9 +85,7 @@ export default function StudyTracker({ user, onLogout }) {
   const [goalAchieved, setGoalAchieved] = useState(false);
   const [goalTriggered, setGoalTriggered] = useState(false);
 
-  const [goalSubject, setGoalSubject] = useState(
-    localStorage.getItem("goalSubject") || ""
-  );
+  const [goalSubject, setGoalSubject] = useState("");
 
   const [dailyGoal, setDailyGoal] = useState(
     Number(localStorage.getItem("dailyGoal")) || 120
@@ -461,75 +459,39 @@ export default function StudyTracker({ user, onLogout }) {
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
   useEffect(() => {
-    if (goalAchieved || goalTriggered) return;
+      if (goalAchieved || goalTriggered) return;
 
-    const dailyTotals = getDailyTotals(records);
-    const subjectTotals = getSubjectTotals(records);
+      const dailyTotals = getDailyTotals(records);
+      const subjectTotals = getSubjectTotals(records);
 
-    const currentMinutes = Math.floor(elapsed / 60);
+      const currentMinutes = Math.floor(elapsed / 60);
 
-    // ★ ① 総合勉強時間（全教科合計）
-    if (goalSubject === "総合") {
-      const savedToday = dailyTotals[selectedDate] || 0;
-      const total = savedToday + currentMinutes;
+      // 科目指定あり → 科目別チェック
+      if (goalSubject) {
+        const savedMinutes = subjectTotals[goalSubject] || 0;
 
-      setProgressMinutes(total);
-
-      if (total >= dailyGoal) {
-        setGoalAchieved(true);
-        setGoalTriggered(true);
-
-        // ★ エフェクト発火
-        setShowEffect(true);
-        setTimeout(() => setShowEffect(false), 2000);
-      }
-      return;
-    }
-
-    // ★ ② 科目指定あり（総合以外）
-    if (goalSubject && goalSubject !== "総合") {
-      const savedMinutes = subjectTotals[goalSubject] || 0;
-
-      const total =
-        studyType === goalSubject
+        const total = studyType === goalSubject
           ? savedMinutes + currentMinutes
           : savedMinutes;
 
-      setProgressMinutes(total);
+        setProgressMinutes(total);
+
+        if (total >= dailyGoal) {
+          setGoalAchieved(true);
+          setGoalTriggered(true);
+        }
+        return;
+      }
+
+      // 科目指定なし → 日別チェック
+      const savedToday = dailyTotals[selectedDate] || 0;
+      const total = savedToday + currentMinutes;
 
       if (total >= dailyGoal) {
         setGoalAchieved(true);
         setGoalTriggered(true);
-
-        // ★ エフェクト発火
-        setShowEffect(true);
-        setTimeout(() => setShowEffect(false), 2000);
       }
-      return;
-    }
-
-    // ★ ③ 科目指定なし（日別）
-    const savedToday = dailyTotals[selectedDate] || 0;
-    const total = savedToday + currentMinutes;
-
-    setProgressMinutes(total);
-
-    if (total >= dailyGoal) {
-      setGoalAchieved(true);
-      setGoalTriggered(true);
-
-      // ★ エフェクト発火
-      setShowEffect(true);
-      setTimeout(() => setShowEffect(false), 2000);
-    }
-  }, [
-    records,
-    selectedDate,
-    goalSubject,
-    dailyGoal,
-    elapsed,
-    studyType
-  ]);
+  }, [records, selectedDate, goalSubject, dailyGoal, elapsed, studyType]);
 
   const colorMap = {
     英語: "#3b82f6",
@@ -884,7 +846,7 @@ export default function StudyTracker({ user, onLogout }) {
                 onChange={(e) => setGoalSubject(e.target.value)}
                 className="w-full p-2 mb-4 bg-gray-700 rounded"
               >
-                <option value="総合">総合勉強時間</option>
+                <option value=""></option>
                 {subjects.map((subj) => (
                   <option key={subj} value={subj}>
                     {subj}
