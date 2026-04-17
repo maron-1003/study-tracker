@@ -71,6 +71,7 @@ export default function StudyTracker({ user, onLogout }) {
 
   const [dailyMemo, setDailyMemo] = useState({});
   const [subjectMemo, setSubjectMemo] = useState({});
+  const [dailyGoal, setDailyGoal] = useState(120);
 
   const timerRef = useRef(null);
 
@@ -383,9 +384,6 @@ export default function StudyTracker({ user, onLogout }) {
   selectedRecords.forEach((r) => {
     dailyTotals[r.type] = (dailyTotals[r.type] || 0) + r.minutes;
   });
-
-  
-  const [dailyGoal, setDailyGoal] = useState(120);
   
   const dailyTotalsAll = getDailyTotals(records);
   const lineChartData = {
