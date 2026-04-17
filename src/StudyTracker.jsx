@@ -61,7 +61,6 @@ export default function StudyTracker({ user, onLogout }) {
   const [elapsed, setElapsed] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [records, setRecords] = useState([]);
-  const [dailyGoal, setDailyGoal] = useState(120);
 
   const [selectedDate, setSelectedDate] = useState(
     dayjs().format("YYYY-MM-DD")
@@ -72,10 +71,10 @@ export default function StudyTracker({ user, onLogout }) {
 
   const [dailyMemo, setDailyMemo] = useState({});
   const [subjectMemo, setSubjectMemo] = useState({});
+  const [dailyGoal, setDailyGoal] = useState(120);
 
   const timerRef = useRef(null);
 
-  const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
   // 勉強記録を読み込み
   useEffect(() => {
@@ -338,6 +337,8 @@ export default function StudyTracker({ user, onLogout }) {
   selectedRecords.forEach((r) => {
     dailyTotals[r.type] = (dailyTotals[r.type] || 0) + r.minutes;
   });
+
+  const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
   const dailyChartData = {
     labels: Object.keys(dailyTotals),
