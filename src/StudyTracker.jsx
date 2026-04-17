@@ -587,13 +587,14 @@ export default function StudyTracker({ user, onLogout }) {
 
 
         <div className="w-full bg-gray-700 h-4 rounded">
-            <div
+          <div
             className="h-4 bg-green-500 rounded"
             style={{
-                width: `${Math.min((todayTotal / dailyGoal) * 100, 100)}%`
+              width: `${Math.min((subjectMinutes / dailyGoal) * 100, 100)}%`
             }}
-            ></div>
+          ></div>
         </div>
+
 
         <p className="mt-2 text-gray-300">
           {goalSubject ? `${goalSubject}：` : ""} {todayTotal} / {dailyGoal} 分
