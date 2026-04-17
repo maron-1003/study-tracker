@@ -463,18 +463,18 @@ export default function StudyTracker({ user, onLogout }) {
   useEffect(() => {
     if (goalAchieved || goalTriggered) return;
 
-    // 現在の経過時間（分）
+    // 経過時間（分）
     const currentMinutes = Math.floor(elapsed / 60);
 
     // ★ ゲージは「今増えた分だけ」
     setProgressMinutes(currentMinutes);
 
-    // ★ 達成判定も「今増えた分だけ」
+    // ★ 達成判定
     if (currentMinutes >= dailyGoal) {
       setGoalAchieved(true);
       setGoalTriggered(true);
 
-      // ★ エフェクト（必要ならここに）
+      // ★ エフェクト（必要ならここ）
       // setShowEffect(true);
       // setTimeout(() => setShowEffect(false), 2000);
     }
