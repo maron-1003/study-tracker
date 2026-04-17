@@ -343,6 +343,16 @@ export default function StudyTracker({ user, onLogout }) {
 
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
+
+  const colorMap = {
+    英語: "#3b82f6",
+    数学: "#10b981",
+    国語: "#f59e0b",
+    理科: "#ef4444",
+    社会: "#8b5cf6",
+    暗記: "#ec4899",
+    自習: "#22c55e",
+  };
   const dailyChartData = {
     labels: Object.keys(dailyTotals),
     datasets: [
@@ -353,16 +363,6 @@ export default function StudyTracker({ user, onLogout }) {
         ),
       },
     ],
-  };
-
-  const colorMap = {
-    英語: "#3b82f6",
-    数学: "#10b981",
-    国語: "#f59e0b",
-    理科: "#ef4444",
-    社会: "#8b5cf6",
-    暗記: "#ec4899",
-    自習: "#22c55e",
   };
 
   const getWeeklyTotal = () => {
