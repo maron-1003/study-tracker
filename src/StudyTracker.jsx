@@ -459,39 +459,59 @@ export default function StudyTracker({ user, onLogout }) {
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
   useEffect(() => {
-      if (goalAchieved || goalTriggered) return;
+    if (goalAchieved || goalTriggered) return;
 
-      const dailyTotals = getDailyTotals(records);
-      const subjectTotals = getSubjectTotals(records);
+    // ★ 目標変更直後は達成判定しない
+    if (justChangedGoal) {
+      setProgressMinutes(0);
+      setGoalAchieved(false);
+      setGoalTriggered(false);
+      setJustChangedGoal(false);
+      return;
+    }
 
-      const currentMinutes = Math.floor(elapsed / 60);
+    const dailyTotals = getDailyTotals(records);
+    const subjectTotals = getSubjectTotals(records);
 
-      // 科目指定あり → 科目別チェック
-      if (goalSubject) {
-        const savedMinutes = subjectTotals[goalSubject] || 0;
+    const currentMinutes = Math.floor(elapsed / 60);
 
-        const total = studyType === goalSubject
+    // 科目指定あり → 科目別チェック
+    if (goalSubject) {
+      const savedMinutes = subjectTotals[goalSubject] || 0;
+
+      const total =
+        studyType === goalSubject
           ? savedMinutes + currentMinutes
           : savedMinutes;
 
-        setProgressMinutes(total);
-
-        if (total >= dailyGoal) {
-          setGoalAchieved(true);
-          setGoalTriggered(true);
-        }
-        return;
-      }
-
-      // 科目指定なし → 日別チェック
-      const savedToday = dailyTotals[selectedDate] || 0;
-      const total = savedToday + currentMinutes;
+      setProgressMinutes(total);
 
       if (total >= dailyGoal) {
         setGoalAchieved(true);
         setGoalTriggered(true);
       }
-  }, [records, selectedDate, goalSubject, dailyGoal, elapsed, studyType]);
+      return;
+    }
+
+    // 科目指定なし → 日別チェック
+    const savedToday = dailyTotals[selectedDate] || 0;
+    const total = savedToday + currentMinutes;
+
+    setProgressMinutes(total);
+
+    if (total >= dailyGoal) {
+      setGoalAchieved(true);
+      setGoalTriggered(true);
+    }
+  }, [
+    records,
+    selectedDate,
+    goalSubject,
+    dailyGoal,
+    elapsed,
+    studyType,
+    justChangedGoal
+  ]);
 
   const colorMap = {
     英語: "#3b82f6",
