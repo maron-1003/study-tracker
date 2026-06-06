@@ -221,6 +221,8 @@ export default function StudyTracker({ user, onLogout }) {
 
   const todayTotal = Object.values(dailyTotals).reduce((a, b) => a + b, 0);
 
+  const [isPastGoalsOpen, setIsPastGoalsOpen] = useState(false);
+
   // 目標達成判定
   useEffect(() => {
     if (progressMinutes >= dailyGoal && !goalTriggered) {
@@ -800,6 +802,27 @@ export default function StudyTracker({ user, onLogout }) {
         </div>
       </div>
 
+      {/* 今日の目標ヘッダー */}
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="text-2xl font-bold text-blue-300">今日の目標</h2>
+
+        <div className="flex gap-3">
+          <button
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+            onClick={() => setIsGoalSettingOpen(true)}
+          >
+            目標を設定する
+          </button>
+
+          <button
+            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg border border-blue-500"
+            onClick={() => setIsPastGoalsOpen(true)}
+          >
+            過去の目標
+          </button>
+        </div>
+      </div>
+
       {/* 目標設定モーダル */}
       {isGoalSettingOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -851,7 +874,6 @@ export default function StudyTracker({ user, onLogout }) {
           </div>
         </div>
       )}
-
       {/* 達成モーダル */}
       {goalAchieved && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center">
