@@ -110,6 +110,22 @@ export default function StudyTracker({ user, onLogout }) {
 
   const [isPastGoalsOpen, setIsPastGoalsOpen] = useState(false);
   const [pastGoals, setPastGoals] = useState([]);
+  const [openDates, setOpenDates] = useState({});
+
+
+  const groupedGoals = pastGoals.reduce((acc, goal) => {
+    const date = goal.achievedAt.split("T")[0]; // yyyy-mm-dd
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(goal);
+    return acc;
+  }, {});
+
+  const toggleDate = (date) => {
+    setOpenDates((prev) => ({
+      ...prev,
+      [date]: !prev[date],
+    }));
+  };
 
   // 勉強記録を読み込み
   useEffect(() => {
@@ -901,17 +917,37 @@ export default function StudyTracker({ user, onLogout }) {
             <h2 className="text-xl font-bold mb-4">過去の目標</h2>
 
               <div className="text-gray-300 space-y-2 max-h-60 overflow-y-auto">
-                {pastGoals.length === 0 ? (
+
+                {Object.keys(groupedGoals).length === 0 ? (
                   <p>まだ過去の目標がありません</p>
                 ) : (
-                  pastGoals.map((g, i) => (
-                    <div key={i} className="p-2 bg-gray-700 rounded">
-                      <p>教科: {g.subject}</p>
-                      <p>目標: {g.goal} 分</p>
-                      <p>達成日: {new Date(g.achievedAt).toLocaleString()}</p>
-                    </div>
-                  ))
+                  Object.keys(groupedGoals)
+                    .sort((a, b) => (a < b ? 1 : -1)) // 新しい日付が上
+                    .map((date) => (
+                      <div key={date} className="bg-gray-700 rounded p-2">
+                        
+                        {/* ▼ 2026-06-06（1件） */}
+                        <button
+                          onClick={() => toggleDate(date)}
+                          className="w-full text-left font-bold"
+                        >
+                          {openDates[date] ? "▼" : "▶"} {date}（{groupedGoals[date].length}件）
+                        </button>
+
+                        {/* 中身（開いてるときだけ表示） */}
+                        {openDates[date] && (
+                          <div className="ml-4 mt-2 space-y-1">
+                            {groupedGoals[date].map((g, i) => (
+                              <div key={i} className="p-2 bg-gray-600 rounded">
+                                <p>・{g.subject} {g.goal}分 達成</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))
                 )}
+
               </div>
 
             <button
