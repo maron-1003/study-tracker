@@ -132,6 +132,31 @@ export default function StudyTracker({ user, onLogout }) {
     });
   };
 
+
+function RankingList({ title, data }) {
+  return (
+    <div className="bg-gray-800 p-4 rounded-lg mb-4 w-full max-w-4xl">
+      <h3 className="text-xl font-bold mb-3 text-blue-300">{title}</h3>
+
+      {data.length === 0 ? (
+        <p className="text-gray-400">まだデータがありません</p>
+      ) : (
+        <ul className="space-y-2">
+          {data.map((item, index) => (
+            <li
+              key={index}
+              className="flex justify-between bg-gray-700 p-3 rounded"
+            >
+              <span className="font-bold">{index + 1}位：{item.user}</span>
+              <span>{item.minutes} 分</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
   // ランキング機能
   const getTodayRanking = () => {
   const today = new Date().toISOString().split("T")[0];
@@ -270,6 +295,13 @@ export default function StudyTracker({ user, onLogout }) {
 
     loadSubjects();
   }, [user]);
+  
+  useEffect(() => {
+    const saved = localStorage.getItem("studyRecords");
+    if (saved) {
+      setStudyRecords(JSON.parse(saved));
+    }
+  }, []);
 
   // dailyMemo を読み込み
   useEffect(() => {
