@@ -575,18 +575,7 @@ export default function StudyTracker({ user, onLogout }) {
 
       {/* カレンダー＋日別グラフ */}
       <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-        <div className="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
-          <h2 className="text-xl font-bold text-blue-300 mb-2">日付を選択</h2>
-
-          <Calendar
-            onChange={(value) =>
-              setSelectedDate(dayjs(value).format("YYYY-MM-DD"))
-            }
-            value={new Date(selectedDate)}
-          />
-        </div>
-
-        <div className="bg-gray-800 p-6 rounded-xl shadow-lg" style={{ height: "300px" }}>
+        <div className="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col h-full">
           <h2 className="text-2xl font-bold mb-4 text-blue-300">
             {selectedDate} の勉強割合
           </h2>
@@ -598,6 +587,7 @@ export default function StudyTracker({ user, onLogout }) {
                 maintainAspectRatio: false,
                 responsive: true,
               }}
+              style={{ height: "100%" }}
             />
           ) : (
             <p className="text-gray-400">この日の記録はありません</p>
