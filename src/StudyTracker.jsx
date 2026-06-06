@@ -575,7 +575,7 @@ export default function StudyTracker({ user, onLogout }) {
 
       {/* カレンダー＋日別グラフ */}
       <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-        <div className="bg-gray-800 p-4 rounded-xl shadow-lg border border-blue-500">
+        <div className="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col">
           <h2 className="text-xl font-bold text-blue-300 mb-2">日付を選択</h2>
 
           <Calendar
