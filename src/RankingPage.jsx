@@ -41,22 +41,29 @@ export default function RankingPage({ studyRecords, userMap }) {
   // ▼ 月間ランキング
   const getMonthlyRanking = () => {
     const now = new Date();
-    const monthAgo = new Date(now);
-    monthAgo.setDate(now.getDate() - 29);
+
+    // 今月の "YYYY-MM" を作る
+    const monthStr = now.toISOString().slice(0, 7); // 例: "2026-06"
 
     return Object.entries(studyRecords)
-      .map(([user, records]) => {
+        .map(([user, records]) => {
         const total = records
-          .filter(r => {
-            const d = new Date(r.date);
-            return d >= monthAgo && d <= now;
-          })
-          .reduce((sum, r) => sum + r.minutes, 0);
+            .filter(r => {
+            const dateStr =
+                typeof r.date === "string"
+                ? r.date
+                : new Date(r.date).toISOString().slice(0, 10);
+
+            return dateStr.startsWith(monthStr); // ← 月間はこれだけでOK
+            })
+            .reduce((sum, r) => sum + r.minutes, 0);
+
         return { user, minutes: total };
-      })
-      .filter(item => item.minutes > 0)
-      .sort((a, b) => b.minutes - a.minutes);
-  };
+        })
+        .filter(item => item.minutes > 0)
+        .sort((a, b) => b.minutes - a.minutes);
+    };
+
 
   const ranking =
     tab === "today"
