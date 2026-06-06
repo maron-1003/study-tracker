@@ -637,14 +637,16 @@ export default function StudyTracker({ user, onLogout }) {
     return <PastGoals user={user} onBack={() => setShowPast(false)} />;
   }
 
+  // いちばん上の return の前あたりに
   if (showRanking) {
     return (
       <RankingPage
-        studyRecords={studyRecords}
+        user={user}
         onBack={() => setShowRanking(false)}
       />
     );
   }
+
 
   return (
 
