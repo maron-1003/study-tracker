@@ -115,6 +115,8 @@ export default function StudyTracker({ user, onLogout }) {
   const [openDates, setOpenDates] = useState({});
   const [studyRecords, setStudyRecords] = useState({});
   const [rankingTab, setRankingTab] = useState("today");
+  const [showRanking, setShowRanking] = useState(false);
+
   const navigate = useNavigate()
 
   const recordStudyTime = (minutes) => {

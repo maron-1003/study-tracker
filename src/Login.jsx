@@ -18,7 +18,6 @@ export default function Login({ onLogin }) {
 
     setLoading(true);
 
-    // ① ニックネームでユーザー検索
     const { data: user, error } = await supabase
       .from("users")
       .select("*")
@@ -31,7 +30,6 @@ export default function Login({ onLogin }) {
       return;
     }
 
-    // ② パスワード照合
     const isValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isValid) {
@@ -40,7 +38,6 @@ export default function Login({ onLogin }) {
       return;
     }
 
-    // ③ ログイン成功 → App.jsx にユーザー情報を渡す
     onLogin({
       id: user.id,
       nickname: user.nickname,
@@ -49,7 +46,6 @@ export default function Login({ onLogin }) {
 
     setLoading(false);
 
-    // 🔥 ④ メイン画面へ遷移
     navigate("/");
   };
 
