@@ -205,23 +205,20 @@ export default function StudyTracker({ user, onLogout }) {
   };
 
   const getMonthRanking = () => {
-  const now = new Date();
-  const month = now.getMonth();
-  const year = now.getFullYear();
+    const now = new Date();
+    const monthStr = now.toISOString().slice(0, 7); // "2026-06"
 
-  const result = Object.entries(studyRecords).map(([user, records]) => {
-    const total = records
-      .filter(r => {
-        const d = new Date(r.date);
-        return d.getMonth() === month && d.getFullYear() === year;
-      })
-      .reduce((sum, r) => sum + r.minutes, 0);
+    const result = Object.entries(studyRecords).map(([user, records]) => {
+      const total = records
+        .filter(r => r.date.startsWith(monthStr))
+        .reduce((sum, r) => sum + r.minutes, 0);
 
-    return { user, minutes: total };
-  });
+      return { user, minutes: total };
+    });
 
     return result.sort((a, b) => b.minutes - a.minutes);
   };
+
 
   const groupedGoals = pastGoals.reduce((acc, goal) => {
     const date = goal.achievedAt.split("T")[0]; // yyyy-mm-dd
