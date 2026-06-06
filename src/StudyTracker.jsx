@@ -461,7 +461,6 @@ export default function StudyTracker({ user, onLogout }) {
           progress_minutes: updated,
         });
 
-        alert("目標達成！過去の目標に保存しました！");
         setProgressMinutes(0);
       }
     }
