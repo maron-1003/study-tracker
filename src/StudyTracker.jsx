@@ -553,7 +553,7 @@ export default function StudyTracker({ user, onLogout }) {
     // ★ ランキング用の記録を追加（ここが重要）
     recordStudyTime(minutes);
 
-    
+
     // ★ 達成したら過去目標に保存
     if (studyType === goalSubject) {
       const updated = progressMinutes + minutes;
@@ -867,6 +867,12 @@ export default function StudyTracker({ user, onLogout }) {
         </div>
       </div>
 
+      <div className="mt-6">
+        <RankingList title="今日のランキング" data={getTodayRanking()} />
+        <RankingList title="今週のランキング" data={getWeekRanking()} />
+        <RankingList title="月間ランキング" data={getMonthRanking()} />
+      </div>
+      
       {/* 今日のメモ */}
       <div className="mt-6 w-full max-w-6xl">
         <h3 className="text-lg mb-2">今日のメモ</h3>
@@ -1077,12 +1083,6 @@ export default function StudyTracker({ user, onLogout }) {
           </div>
         </div>
       )}
-
-      <div className="mt-6">
-        <RankingList title="今日のランキング" data={getTodayRanking()} />
-        <RankingList title="今週のランキング" data={getWeekRanking()} />
-        <RankingList title="月間ランキング" data={getMonthRanking()} />
-      </div>
 
     </div>
     
