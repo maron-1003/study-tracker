@@ -592,7 +592,14 @@ export default function StudyTracker({ user, onLogout }) {
           </h2>
 
           {selectedRecords.length > 0 ? (
-            <Doughnut data={dailyChartData} />
+            <Doughnut
+              data={dailyChartData}
+              options={{
+                maintainAspectRatio: false,
+                responsive: true,
+              }}
+              style={{ height: "250px" }}
+            />
           ) : (
             <p className="text-gray-400">この日の記録はありません</p>
           )}
