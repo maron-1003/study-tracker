@@ -873,6 +873,7 @@ export default function StudyTracker({ user, onLogout }) {
         <RankingList title="月間ランキング" data={getMonthRanking()} />
       </div>
       
+      
       {/* 今日のメモ */}
       <div className="mt-6 w-full max-w-6xl">
         <h3 className="text-lg mb-2">今日のメモ</h3>
