@@ -113,6 +113,7 @@ export default function StudyTracker({ user, onLogout }) {
   const [pastGoals, setPastGoals] = useState([]);
   const [openDates, setOpenDates] = useState({});
   const [studyRecords, setStudyRecords] = useState({});
+  const [showRanking, setShowRanking] = useState(false);
 
   const recordStudyTime = (minutes) => {
     const today = new Date().toISOString().split("T")[0];
