@@ -539,11 +539,6 @@ export default function StudyTracker({ user, onLogout }) {
           {dailyGoal} 分
         </p>
       </div>
-      
-      <button onClick={() => setShowPast(true)}>
-        過去の目標を見る
-      </button>
-
       {/* カレンダーのダークテーマ */}
       <style>{`
         .react-calendar {
