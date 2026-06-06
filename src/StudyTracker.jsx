@@ -574,7 +574,7 @@ export default function StudyTracker({ user, onLogout }) {
       </h1>
 
       {/* カレンダー＋日別グラフ */}
-      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-[1.2fr_0.8fr] gap-6">
         <div className="bg-gray-800 p-4 rounded-xl shadow-lg border border-blue-500">
           <h2 className="text-xl font-bold text-blue-300 mb-2">日付を選択</h2>
 
@@ -586,13 +586,20 @@ export default function StudyTracker({ user, onLogout }) {
           />
         </div>
 
-        <div className="bg-gray-800 p-6 rounded-xl shadow-lg">
-          <h2 className="text-2xl font-bold mb-4 text-blue-300">
+        <div className="bg-gray-800 p-4 rounded-xl shadow-lg flex flex-col">
+          <h2 className="text-xl font-bold mb-3 text-blue-300">
             {selectedDate} の勉強割合
           </h2>
 
           {selectedRecords.length > 0 ? (
-            <Doughnut data={dailyChartData} />
+            <Doughnut
+              data={dailyChartData}
+              options={{
+                maintainAspectRatio: false,
+                responsive: true,
+              }}
+              style={{ height: "220px" }}
+            />
           ) : (
             <p className="text-gray-400">この日の記録はありません</p>
           )}
