@@ -115,14 +115,13 @@ export default function StudyTracker({ user, onLogout }) {
   const [studyRecords, setStudyRecords] = useState({});
 
   const recordStudyTime = (minutes) => {
-    const currentUser = user.id;
     const today = new Date().toISOString().split("T")[0];
 
     setStudyRecords(prev => {
       const updated = {
         ...prev,
-        [currentUser]: [
-          ...(prev[currentUser] || []),
+        [user.nickname]: [
+          ...(prev[user.nickname] || []),
           { date: today, minutes }
         ]
       };
@@ -131,7 +130,6 @@ export default function StudyTracker({ user, onLogout }) {
       return updated;
     });
   };
-
 
 function RankingList({ title, data }) {
   return (
@@ -295,7 +293,7 @@ function RankingList({ title, data }) {
 
     loadSubjects();
   }, [user]);
-  
+
   useEffect(() => {
     const saved = localStorage.getItem("studyRecords");
     if (saved) {
