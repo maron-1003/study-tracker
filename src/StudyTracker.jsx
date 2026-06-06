@@ -107,8 +107,9 @@ export default function StudyTracker({ user, onLogout }) {
   const [justChangedGoal, setJustChangedGoal] = useState(false);
   
   const [showPast, setShowPast] = useState(false);
-  
+
   const [isPastGoalsOpen, setIsPastGoalsOpen] = useState(false);
+  const [pastGoals, setPastGoals] = useState([]);
 
   // 勉強記録を読み込み
   useEffect(() => {
