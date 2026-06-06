@@ -539,8 +539,7 @@ export default function StudyTracker({ user, onLogout }) {
           {dailyGoal} 分
         </p>
       </div>
-
-      // 過去の目標みる
+      
       <button onClick={() => setShowPast(true)}>
         過去の目標を見る
       </button>
