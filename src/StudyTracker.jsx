@@ -18,6 +18,7 @@ import isoWeek from "dayjs/plugin/isoWeek";
 import { supabase } from "./supabaseClient";
 import { savePastGoal } from "./pastGoals/savePastGoal";
 import PastGoals from "./pastGoals/PastGoals";
+import { useNavigate } from "react-router-dom"
 
 ChartJS.register(
   ArcElement,
@@ -113,6 +114,8 @@ export default function StudyTracker({ user, onLogout }) {
   const [pastGoals, setPastGoals] = useState([]);
   const [openDates, setOpenDates] = useState({});
   const [studyRecords, setStudyRecords] = useState({});
+  const [rankingTab, setRankingTab] = useState("today");
+  const navigate = useNavigate()
 
   const recordStudyTime = (minutes) => {
     const today = new Date().toISOString().split("T")[0];
