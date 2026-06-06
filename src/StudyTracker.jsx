@@ -157,18 +157,26 @@ export default function StudyTracker({ user, onLogout }) {
 
   // ランキング機能
   const getTodayRanking = () => {
-  const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split("T")[0];
 
-  const result = Object.entries(studyRecords).map(([user, records]) => {
-    const total = records
-      .filter(r => r.date === today)
-      .reduce((sum, r) => sum + r.minutes, 0);
+    // ★ studyRecords が空なら空配列を返す（UI が出る）
+    if (!studyRecords || Object.keys(studyRecords).length === 0) {
+      return [];
+    }
 
-    return { user, minutes: total };
-  });
+    const result = Object.entries(studyRecords)
+      .map(([user, records]) => {
+        const total = records
+          .filter(r => r.date === today)
+          .reduce((sum, r) => sum + r.minutes, 0);
+
+        return { user, minutes: total };
+      })
+      .filter(item => item.minutes > 0);
 
     return result.sort((a, b) => b.minutes - a.minutes);
   };
+
   const getWeekRanking = () => {
     const now = new Date();
     const weekStart = new Date(now);
