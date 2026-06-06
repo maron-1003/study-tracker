@@ -598,7 +598,7 @@ export default function StudyTracker({ user, onLogout }) {
           </h2>
 
           {selectedRecords.length > 0 ? (
-            <div className="w-full" style={{ height: "180px" }}>
+            <div className="w-full" style={{ height: "220px" }}>
               <Doughnut
                 data={dailyChartData}
                 options={{
