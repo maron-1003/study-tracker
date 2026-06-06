@@ -118,23 +118,29 @@ export default function StudyTracker({ user, onLogout }) {
   const [showRanking, setShowRanking] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
 
-  const recordStudyTime = (minutes) => {
-    const today = new Date().toISOString().split("T")[0];
-    const username = user?.nickname || user?.id || "unknown";
-
+  const recordStudyTime = ({ minutes, date }) => {
     setStudyRecords(prev => {
-      const updated = {
-        ...prev,
-        [username]: [
-          ...(prev[username] || []),
-          { date: today, minutes }
-        ]
+      const username = user?.nickname || user?.id || "unknown";
+
+      const userRecords = prev[username] || [];
+
+      const newRecord = {
+        minutes,
+        date, // ← ランキングに必須
       };
 
+      const updated = {
+        ...prev,
+        [username]: [...userRecords, newRecord],
+      };
+
+      // ローカルストレージにも保存
       localStorage.setItem("studyRecords", JSON.stringify(updated));
+
       return updated;
     });
   };
+
 
 
   function RankingList({ title, data }) {
@@ -516,24 +522,6 @@ export default function StudyTracker({ user, onLogout }) {
     if (studyType === goalSubject) {
       setProgressMinutes(prev => prev + minutes);
     }
-
-    const recordStudyTime = ({ minutes, date }) => {
-      setStudyRecords(prev => {
-        const username = user.nickname; // ← あなたのアプリのユーザー名
-
-        const userRecords = prev[username] || [];
-
-        const newRecord = {
-          minutes,
-          date, // ← これがランキングに必須
-        };
-
-        return {
-          ...prev,
-          [username]: [...userRecords, newRecord],
-        };
-      });
-    };
 
 
     // ★ 達成したら過去目標に保存
