@@ -126,6 +126,15 @@ export default function StudyTracker({ user, onLogout }) {
       [date]: !prev[date],
     }));
   };
+  
+  // 過去の目標を読み込み
+  useEffect(() => {
+    const saved = localStorage.getItem("pastGoals");
+    if (saved) {
+      setPastGoals(JSON.parse(saved));
+    }
+  }, []);
+
 
   // 勉強記録を読み込み
   useEffect(() => {
@@ -403,8 +412,6 @@ export default function StudyTracker({ user, onLogout }) {
           target_minutes: dailyGoal,
           progress_minutes: updated,
         });
-
-        alert("目標達成！過去の目標に保存しました！");
         setProgressMinutes(0);
       }
     }
@@ -890,18 +897,25 @@ export default function StudyTracker({ user, onLogout }) {
             </p>
             <button
                 onClick={() => {
-                  // 過去の目標に追加
-                  setPastGoals((prev) => [
-                    ...prev,
-                    {
-                      subject: goalSubject,
-                      goal: dailyGoal,
-                      achievedAt: new Date().toISOString(),
-                    },
-                  ]);
+                  const newGoal = {
+                    subject: goalSubject,
+                    goal: dailyGoal,
+                    achievedAt: new Date().toISOString(),
+                  };
+
+                  // state に追加
+                  setPastGoals((prev) => {
+                    const updated = [...prev, newGoal];
+
+                    // localStorage に保存
+                    localStorage.setItem("pastGoals", JSON.stringify(updated));
+
+                    return updated;
+                  });
 
                   setGoalAchieved(false);
-                }}              
+                }}
+           
                 className="px-4 py-2 bg-white text-green-700 font-bold rounded"
             >
               閉じる
