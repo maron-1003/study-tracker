@@ -260,7 +260,7 @@ export default function StudyTracker({ user, onLogout }) {
   useEffect(() => {
     const fetchUsers = async () => {
       const { data, error } = await supabase
-        .from("profiles")
+        .from("users")
         .select("id, nickname");
 
       if (!error && data) {
