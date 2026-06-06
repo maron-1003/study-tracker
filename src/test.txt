@@ -33,6 +33,7 @@ ChartJS.register(
 dayjs.extend(isoWeek);
 
 const baseSubjects = ["国語", "数学", "英語", "理科", "社会"];
+const [showPast, setShowPast] = useState(false);
 
 function getWeekNumber(date) {
   return dayjs(date).isoWeek();
@@ -105,8 +106,6 @@ export default function StudyTracker({ user, onLogout }) {
 
   const [wEffect, setShowEffect] = useState(false);
   const [justChangedGoal, setJustChangedGoal] = useState(false);
-  
-  const [showPast, setShowPast] = useState(false);
 
   // 勉強記録を読み込み
   useEffect(() => {
@@ -373,23 +372,6 @@ export default function StudyTracker({ user, onLogout }) {
       setProgressMinutes(prev => prev + minutes);
     }
 
-    // ★ 達成したら過去目標に保存
-    if (studyType === goalSubject) {
-      const updated = progressMinutes + minutes;
-
-      if (updated >= dailyGoal) {
-        await savePastGoal({
-          user_id: user.id,
-          subject: goalSubject,
-          target_minutes: dailyGoal,
-          progress_minutes: updated,
-        });
-
-        alert("目標達成！過去の目標に保存しました！");
-        setProgressMinutes(0);
-      }
-    }
-
     setStartTime(null);
     setElapsed(0);
   };
@@ -423,23 +405,6 @@ export default function StudyTracker({ user, onLogout }) {
     if (studyType === goalSubject) {
       setProgressMinutes(prev => prev + minutes);
     }
-        // ★ 達成したら過去目標に保存
-    if (studyType === goalSubject) {
-      const updated = progressMinutes + minutes;
-
-      if (updated >= dailyGoal) {
-        await savePastGoal({
-          user_id: user.id,
-          subject: goalSubject,
-          target_minutes: dailyGoal,
-          progress_minutes: updated,
-        });
-
-        alert("目標達成！過去の目標に保存しました！");
-        setProgressMinutes(0);
-      }
-    }
-
   };
 
 
@@ -492,9 +457,8 @@ export default function StudyTracker({ user, onLogout }) {
   };
 
   if (showPast) {
-    return <PastGoals user={user} onBack={() => setShowPast(false)} />;
-  }
-
+  return <PastGoals user={user} onBack={() => setShowPast(false)} />;
+}
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center">
