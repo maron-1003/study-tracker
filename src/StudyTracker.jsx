@@ -119,13 +119,13 @@ export default function StudyTracker({ user, onLogout }) {
 
   const recordStudyTime = ({ minutes, date }) => {
     setStudyRecords(prev => {
-      const username = user?.nickname || user?.id || "unknown";
+      const username = user.id;  // ← ここを固定する
 
       const userRecords = prev[username] || [];
 
       const newRecord = {
         minutes,
-        date, // ← ランキングに必須
+        date,
       };
 
       const updated = {
@@ -133,12 +133,12 @@ export default function StudyTracker({ user, onLogout }) {
         [username]: [...userRecords, newRecord],
       };
 
-      // ローカルストレージにも保存
       localStorage.setItem("studyRecords", JSON.stringify(updated));
 
       return updated;
     });
   };
+
 
 
 
