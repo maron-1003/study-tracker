@@ -66,16 +66,17 @@ export default function RankingPage({ studyRecords }) {
       : getMonthlyRanking();
 
   return (
-    <div className="w-full max-w-3xl mx-auto text-white">
+    <div className="w-full max-w-5xl mx-auto text-white flex gap-6">
 
-      {/* ▼ ランキングタブ */}
-      <div className="flex gap-6 mb-6 border-b border-gray-700 pb-2">
+      {/* ▼ 縦タブ */}
+      <div className="w-40 flex flex-col gap-3 border-r border-gray-700 pr-4">
+
         <button
           onClick={() => setTab("today")}
-          className={`pb-2 ${
+          className={`text-left px-3 py-2 rounded ${
             tab === "today"
-              ? "text-blue-400 border-b-2 border-blue-400"
-              : "text-gray-400"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
           }`}
         >
           今日
@@ -83,10 +84,10 @@ export default function RankingPage({ studyRecords }) {
 
         <button
           onClick={() => setTab("week")}
-          className={`pb-2 ${
+          className={`text-left px-3 py-2 rounded ${
             tab === "week"
-              ? "text-blue-400 border-b-2 border-blue-400"
-              : "text-gray-400"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
           }`}
         >
           週間
@@ -94,39 +95,45 @@ export default function RankingPage({ studyRecords }) {
 
         <button
           onClick={() => setTab("month")}
-          className={`pb-2 ${
+          className={`text-left px-3 py-2 rounded ${
             tab === "month"
-              ? "text-blue-400 border-b-2 border-blue-400"
-              : "text-gray-400"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
           }`}
         >
           月間
         </button>
+
       </div>
 
-      <h1 className="text-3xl font-bold mb-6">
-        {tab === "today"
-          ? "今日のランキング"
-          : tab === "week"
-          ? "週間ランキング"
-          : "月間ランキング"}
-      </h1>
+      {/* ▼ ランキング内容 */}
+      <div className="flex-1">
 
-      <div className="bg-gray-800 p-4 rounded-lg shadow-lg">
-        {ranking.length === 0 && (
-          <p className="text-gray-400">まだ記録がありません</p>
-        )}
+        <h1 className="text-3xl font-bold mb-6">
+          {tab === "today"
+            ? "今日のランキング"
+            : tab === "week"
+            ? "週間ランキング"
+            : "月間ランキング"}
+        </h1>
 
-        {ranking.map((item, index) => (
-          <div
-            key={index}
-            className="flex justify-between p-3 border-b border-gray-700"
-          >
-            <span>{index + 1}位</span>
-            <span>{item.user}</span>
-            <span>{item.minutes}分</span>
-          </div>
-        ))}
+        <div className="bg-gray-800 p-4 rounded-lg shadow-lg">
+          {ranking.length === 0 && (
+            <p className="text-gray-400">まだ記録がありません</p>
+          )}
+
+          {ranking.map((item, index) => (
+            <div
+              key={index}
+              className="flex justify-between p-3 border-b border-gray-700"
+            >
+              <span>{index + 1}位</span>
+              <span>{item.user}</span>
+              <span>{item.minutes}分</span>
+            </div>
+          ))}
+        </div>
+
       </div>
     </div>
   );
