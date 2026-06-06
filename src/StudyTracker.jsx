@@ -586,7 +586,7 @@ export default function StudyTracker({ user, onLogout }) {
           />
         </div>
 
-        <div className="bg-gray-800 p-6 rounded-xl shadow-lg">
+        <div className="bg-gray-800 p-6 rounded-xl shadow-lg" style={{ height: "300px" }}>
           <h2 className="text-2xl font-bold mb-4 text-blue-300">
             {selectedDate} の勉強割合
           </h2>
@@ -598,7 +598,6 @@ export default function StudyTracker({ user, onLogout }) {
                 maintainAspectRatio: false,
                 responsive: true,
               }}
-              style={{ height: "400px" }}
             />
           ) : (
             <p className="text-gray-400">この日の記録はありません</p>
