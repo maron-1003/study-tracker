@@ -114,25 +114,15 @@ export default function StudyTracker({ user, onLogout }) {
   const [openDates, setOpenDates] = useState({});
   const [studyRecords, setStudyRecords] = useState({});
 
-  const [studyRecords, setStudyRecords] = useState({
-    "userA": [
-      { date: "2026-06-06", minutes: 50 },
-      { date: "2026-06-05", minutes: 30 }
-    ],
-    "userB": [
-      { date: "2026-06-06", minutes: 20 }
-    ]
-  });
-
   const recordStudyTime = (minutes) => {
-    const user = currentUser;
+    const currentUser = user.id;
     const today = new Date().toISOString().split("T")[0];
 
     setStudyRecords(prev => {
       const updated = {
         ...prev,
-        [user]: [
-          ...(prev[user] || []),
+        [currentUser]: [
+          ...(prev[currentUser] || []),
           { date: today, minutes }
         ]
       };
