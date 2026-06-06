@@ -586,7 +586,7 @@ export default function StudyTracker({ user, onLogout }) {
           />
         </div>
 
-        <div className="bg-gray-800 p-3 rounded-xl shadow-lg flex flex-col">
+        <div className="bg-gray-800 p-3 rounded-xl shadow-lg flex flex-col h-fit">
           <h2 className="text-lg font-bold mb-2 text-blue-300">
             {selectedDate} の勉強割合
           </h2>
