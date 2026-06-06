@@ -247,6 +247,11 @@ export default function StudyTracker({ user, onLogout }) {
   }, []);
 
 
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("studyRecords") || "{}");
+    setStudyRecords(saved);
+  }, []);
+
   // 勉強記録を読み込み
   useEffect(() => {
     if (!user) return;
