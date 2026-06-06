@@ -598,6 +598,10 @@ export default function StudyTracker({ user, onLogout }) {
           )}
         </div>
       </div>
+      {/* 過去の目標みる */}
+      <button onClick={() => setShowPast(true)}>
+        過去の目標を見る
+      </button>
 
       {/* タイマー */}
       <div className="w-full max-w-4xl bg-gray-800 p-6 rounded-xl shadow-lg mt-10">
