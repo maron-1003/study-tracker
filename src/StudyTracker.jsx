@@ -514,31 +514,40 @@ export default function StudyTracker({ user, onLogout }) {
 
       {/* 今日の目標 */}
       <div className="w-full max-w-6xl bg-gray-800 p-4 rounded mb-6">
-        <h3 className="text-lg font-bold mb-2">今日の目標</h3>
-        <button
-          onClick={openGoalSetting}
-          className="mb-3 px-3 py-1 bg-blue-500 rounded hover:bg-blue-600"
-        >
-          目標を設定する
-        </button>
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-lg font-bold">今日の目標</h3>
+
+          <div className="flex gap-3">
+            <button
+              onClick={openGoalSetting}
+              className="px-3 py-1 bg-blue-500 rounded hover:bg-blue-600"
+            >
+              目標を設定する
+            </button>
+
+            <button
+              onClick={() => setIsPastGoalsOpen(true)}
+              className="px-3 py-1 bg-gray-700 border border-blue-400 rounded hover:bg-gray-600"
+            >
+              過去の目標
+            </button>
+          </div>
+        </div>
 
         <div className="w-full bg-gray-700 h-4 rounded">
           <div
             className="h-4 bg-green-500 rounded"
             style={{
-              width: `${Math.min(
-                (progressMinutes / dailyGoal) * 100,
-                100
-              )}%`,
+              width: `${Math.min((progressMinutes / dailyGoal) * 100, 100)}%`,
             }}
           ></div>
         </div>
 
         <p className="mt-2 text-gray-300">
-          {goalSubject ? `${goalSubject}：` : ""} {progressMinutes} /{" "}
-          {dailyGoal} 分
+          {goalSubject ? `${goalSubject}：` : ""} {progressMinutes} / {dailyGoal} 分
         </p>
       </div>
+
       {/* カレンダーのダークテーマ */}
       <style>{`
         .react-calendar {
@@ -851,6 +860,7 @@ export default function StudyTracker({ user, onLogout }) {
           </div>
         </div>
       )}
+      
       {/* 達成モーダル */}
       {goalAchieved && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center">
