@@ -107,6 +107,8 @@ export default function StudyTracker({ user, onLogout }) {
   const [justChangedGoal, setJustChangedGoal] = useState(false);
   
   const [showPast, setShowPast] = useState(false);
+  
+  const [isPastGoalsOpen, setIsPastGoalsOpen] = useState(false);
 
   // 勉強記録を読み込み
   useEffect(() => {
@@ -881,6 +883,25 @@ export default function StudyTracker({ user, onLogout }) {
           </div>
         </div>
       )}
+
+      {/* 過去の目標モーダル */}
+      {isPastGoalsOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-gray-800 p-6 rounded-lg w-80">
+            <h2 className="text-xl font-bold mb-4">過去の目標</h2>
+
+            <p className="text-gray-300">ここに過去の目標一覧を表示</p>
+
+            <button
+              onClick={() => setIsPastGoalsOpen(false)}
+              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded"
+            >
+              閉じる
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
