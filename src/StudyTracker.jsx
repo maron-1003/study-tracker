@@ -588,8 +588,11 @@ export default function StudyTracker({ user, onLogout }) {
           />
         </div>
 
-        {/* 右：グラフ（高さ固定で安定） */}
-        <div className="bg-gray-800 p-3 rounded-xl shadow-lg">
+        {/* 右：グラフ（min-height で少し大きく） */}
+        <div
+          className="bg-gray-800 p-3 rounded-xl shadow-lg"
+          style={{ minHeight: "260px" }}   // ← ここだけ追加
+        >
           <h2 className="text-lg font-bold mb-2 text-blue-300">
             {selectedDate} の勉強割合
           </h2>
