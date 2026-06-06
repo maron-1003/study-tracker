@@ -574,31 +574,30 @@ export default function StudyTracker({ user, onLogout }) {
       </h1>
 
       {/* カレンダー＋日別グラフ */}
-      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-        <div className="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-between h-full">
+      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-gray-800 p-4 rounded-xl shadow-lg border border-blue-500">
+          <h2 className="text-xl font-bold text-blue-300 mb-2">日付を選択</h2>
+
+          <Calendar
+            onChange={(value) =>
+              setSelectedDate(dayjs(value).format("YYYY-MM-DD"))
+            }
+            value={new Date(selectedDate)}
+          />
+        </div>
+
+        <div className="bg-gray-800 p-6 rounded-xl shadow-lg">
           <h2 className="text-2xl font-bold mb-4 text-blue-300">
             {selectedDate} の勉強割合
           </h2>
 
           {selectedRecords.length > 0 ? (
-            <Doughnut
-              data={dailyChartData}
-              options={{
-                maintainAspectRatio: false,
-                responsive: true,
-              }}
-              style={{ height: "100%" }}
-            />
+            <Doughnut data={dailyChartData} />
           ) : (
             <p className="text-gray-400">この日の記録はありません</p>
           )}
         </div>
-
       </div>
-      {/* 過去の目標みる */}
-      <button onClick={() => setShowPast(true)}>
-        過去の目標を見る
-      </button>
 
       {/* タイマー */}
       <div className="w-full max-w-4xl bg-gray-800 p-6 rounded-xl shadow-lg mt-10">
