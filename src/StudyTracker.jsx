@@ -18,6 +18,8 @@ import isoWeek from "dayjs/plugin/isoWeek";
 import { supabase } from "./supabaseClient";
 import { savePastGoal } from "./pastGoals/savePastGoal";
 import PastGoals from "./pastGoals/PastGoals";
+import RankingPage from "./RankingPage";
+
 
 ChartJS.register(
   ArcElement,
