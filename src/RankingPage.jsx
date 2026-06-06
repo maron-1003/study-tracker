@@ -128,7 +128,7 @@ export default function RankingPage({ studyRecords }) {
               className="flex justify-between p-3 border-b border-gray-700"
             >
               <span>{index + 1}位</span>
-              <span>{item.user}</span>
+              <span>{userMap[item.user] || item.user}</span>
               <span>{item.minutes}分</span>
             </div>
           ))}

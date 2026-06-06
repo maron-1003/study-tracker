@@ -1110,8 +1110,12 @@ export default function StudyTracker({ user, onLogout }) {
 
       {/* ▼ ランキングタブ */}
       {activeTab === "ranking" && (
-        <RankingPage studyRecords={studyRecords} />
+        <RankingPage
+          studyRecords={studyRecords}
+          userMap={{ [user.id]: user.nickname }}
+        />
       )}
+
 
     </div>
   );
