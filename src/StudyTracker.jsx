@@ -593,6 +593,8 @@ export default function StudyTracker({ user, onLogout }) {
             <p className="text-gray-400">この日の記録はありません</p>
           )}
         </div>
+
+      </div>
       {/* 過去の目標みる */}
       <button onClick={() => setShowPast(true)}>
         過去の目標を見る
