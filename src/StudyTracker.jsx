@@ -116,6 +116,7 @@ export default function StudyTracker({ user, onLogout }) {
   const [openDates, setOpenDates] = useState({});
   const [studyRecords, setStudyRecords] = useState({});
   const [showRanking, setShowRanking] = useState(false);
+  const [activeTab, setActiveTab] = useState("home");
 
   const recordStudyTime = (minutes) => {
     const today = new Date().toISOString().split("T")[0];
@@ -650,8 +651,31 @@ export default function StudyTracker({ user, onLogout }) {
 
 
   return (
-
     <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center">
+      {/* タブバー */}
+      <div className="w-full max-w-6xl flex gap-6 mb-6 border-b border-gray-700 pb-2">
+        <button
+          onClick={() => setActiveTab("home")}
+          className={`pb-2 ${
+            activeTab === "home"
+              ? "text-blue-400 border-b-2 border-blue-400"
+              : "text-gray-400"
+          }`}
+        >
+          ホーム
+        </button>
+
+        <button
+          onClick={() => setActiveTab("ranking")}
+          className={`pb-2 ${
+            activeTab === "ranking"
+              ? "text-blue-400 border-b-2 border-blue-400"
+              : "text-gray-400"
+          }`}
+        >
+          ランキング
+        </button>
+      </div>
       {/* ヘッダー */}
       <div className="w-full max-w-6xl flex justify-between items-center mb-6">
         <h2 className="text-xl text-blue-300 font-bold">
