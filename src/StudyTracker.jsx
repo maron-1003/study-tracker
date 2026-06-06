@@ -598,7 +598,7 @@ export default function StudyTracker({ user, onLogout }) {
                 maintainAspectRatio: false,
                 responsive: true,
               }}
-              style={{ height: "150px" }}
+              style={{ height: "400px" }}
             />
           ) : (
             <p className="text-gray-400">この日の記録はありません</p>
