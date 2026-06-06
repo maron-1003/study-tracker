@@ -67,6 +67,7 @@ function getSubjectTotals(records) {
 }
 
 export default function StudyTracker({ user, onLogout }) {
+  
   const [studyType, setStudyType] = useState("");
   const [startTime, setStartTime] = useState(null);
   const [elapsed, setElapsed] = useState(0);
@@ -111,7 +112,103 @@ export default function StudyTracker({ user, onLogout }) {
   const [isPastGoalsOpen, setIsPastGoalsOpen] = useState(false);
   const [pastGoals, setPastGoals] = useState([]);
   const [openDates, setOpenDates] = useState({});
+  const [studyRecords, setStudyRecords] = useState({});
 
+  const [studyRecords, setStudyRecords] = useState({
+    "userA": [
+      { date: "2026-06-06", minutes: 50 },
+      { date: "2026-06-05", minutes: 30 }
+    ],
+    "userB": [
+      { date: "2026-06-06", minutes: 20 }
+    ]
+  });
+
+  const recordStudyTime = (minutes) => {
+    const user = currentUser;
+    const today = new Date().toISOString().split("T")[0];
+
+    setStudyRecords(prev => {
+      const updated = {
+        ...prev,
+        [user]: [
+          ...(prev[user] || []),
+          { date: today, minutes }
+        ]
+      };
+
+      localStorage.setItem("studyRecords", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // ランキング機能
+  const getTodayRanking = () => {
+  const today = new Date().toISOString().split("T")[0];
+
+  const result = Object.entries(studyRecords).map(([user, records]) => {
+    const total = records
+      .filter(r => r.date === today)
+      .reduce((sum, r) => sum + r.minutes, 0);
+
+    return { user, minutes: total };
+  });
+
+    return result.sort((a, b) => b.minutes - a.minutes);
+  };
+  const getWeekRanking = () => {
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay()); // 日曜スタート
+
+    const result = Object.entries(studyRecords).map(([user, records]) => {
+      const total = records
+        .filter(r => new Date(r.date) >= weekStart)
+        .reduce((sum, r) => sum + r.minutes, 0);
+
+      return { user, minutes: total };
+    });
+
+    return result.sort((a, b) => b.minutes - a.minutes);
+  };
+
+  const getMonthRanking = () => {
+  const now = new Date();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+
+  const result = Object.entries(studyRecords).map(([user, records]) => {
+    const total = records
+      .filter(r => {
+        const d = new Date(r.date);
+        return d.getMonth() === month && d.getFullYear() === year;
+      })
+      .reduce((sum, r) => sum + r.minutes, 0);
+
+    return { user, minutes: total };
+  });
+
+    return result.sort((a, b) => b.minutes - a.minutes);
+  };
+
+  const getMonthRanking = () => {
+  const now = new Date();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+
+  const result = Object.entries(studyRecords).map(([user, records]) => {
+    const total = records
+      .filter(r => {
+        const d = new Date(r.date);
+        return d.getMonth() === month && d.getFullYear() === year;
+      })
+      .reduce((sum, r) => sum + r.minutes, 0);
+
+    return { user, minutes: total };
+  });
+
+    return result.sort((a, b) => b.minutes - a.minutes);
+  };
 
   const groupedGoals = pastGoals.reduce((acc, goal) => {
     const date = goal.achievedAt.split("T")[0]; // yyyy-mm-dd
@@ -401,6 +498,9 @@ export default function StudyTracker({ user, onLogout }) {
       setProgressMinutes(prev => prev + minutes);
     }
 
+    // ★ ランキング用の記録を追加（ここが重要）
+    recordStudyTime(minutes);
+
     // ★ 達成したら過去目標に保存
     if (studyType === goalSubject) {
       const updated = progressMinutes + minutes;
@@ -449,7 +549,12 @@ export default function StudyTracker({ user, onLogout }) {
     if (studyType === goalSubject) {
       setProgressMinutes(prev => prev + minutes);
     }
-        // ★ 達成したら過去目標に保存
+    
+    // ★ ランキング用の記録を追加（ここが重要）
+    recordStudyTime(minutes);
+
+    
+    // ★ 達成したら過去目標に保存
     if (studyType === goalSubject) {
       const updated = progressMinutes + minutes;
 
@@ -973,6 +1078,13 @@ export default function StudyTracker({ user, onLogout }) {
         </div>
       )}
 
+      <div className="mt-6">
+        <RankingList title="今日のランキング" data={getTodayRanking()} />
+        <RankingList title="今週のランキング" data={getWeekRanking()} />
+        <RankingList title="月間ランキング" data={getMonthRanking()} />
+      </div>
+
     </div>
+    
   );
 }
