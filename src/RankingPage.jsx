@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function RankingPage({ studyRecords }) {
+export default function RankingPage({ studyRecords, userMap }) {
   const [tab, setTab] = useState("today");
 
   const today = new Date().toISOString().split("T")[0];
