@@ -655,12 +655,16 @@ export default function StudyTracker({ user, onLogout }) {
 
 
   return (
+    
     <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center">
       {/* ヘッダー */}
       <div className="w-full max-w-6xl flex justify-between items-center mb-6">
         <h2 className="text-xl text-blue-300 font-bold">
           ようこそ、{user.nickname} さん
         </h2>
+          <button className="bg-blue-500 p-3 rounded text-white">
+            テストボタン
+          </button>
 
         <button
           onClick={onLogout}
