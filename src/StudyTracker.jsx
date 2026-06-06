@@ -501,20 +501,40 @@ export default function StudyTracker({ user, onLogout }) {
       minute: "2-digit",
     });
 
+    // ★ ランキング用に必ず YYYY-MM-DD を使う
+    const date = selectedDate;
+
     await addRecord({
       subject: studyType,
       minutes,
-      date: selectedDate,
+      date,
       start: startStr,
       end: endStr,
     });
+
     // ★ 目標教科なら progressMinutes を積み上げる
     if (studyType === goalSubject) {
       setProgressMinutes(prev => prev + minutes);
     }
 
-    // ★ ランキング用の記録を追加（ここが重要）
-    recordStudyTime(minutes);
+    const recordStudyTime = ({ minutes, date }) => {
+      setStudyRecords(prev => {
+        const username = user.nickname; // ← あなたのアプリのユーザー名
+
+        const userRecords = prev[username] || [];
+
+        const newRecord = {
+          minutes,
+          date, // ← これがランキングに必須
+        };
+
+        return {
+          ...prev,
+          [username]: [...userRecords, newRecord],
+        };
+      });
+    };
+
 
     // ★ 達成したら過去目標に保存
     if (studyType === goalSubject) {
@@ -534,6 +554,8 @@ export default function StudyTracker({ user, onLogout }) {
     setStartTime(null);
     setElapsed(0);
   };
+
+
 
   const deleteRecord = async (index) => {
     const target = records[index];
@@ -560,14 +582,16 @@ export default function StudyTracker({ user, onLogout }) {
       date: selectedDate,
     });
 
+    // ★ ランキングにも反映させる（重要）
+    recordStudyTime({
+      minutes,
+      date: selectedDate,
+    });
+
     // ★ 目標教科なら progressMinutes を積み上げる
     if (studyType === goalSubject) {
       setProgressMinutes(prev => prev + minutes);
     }
-    
-    // ★ ランキング用の記録を追加（ここが重要）
-    recordStudyTime(minutes);
-
 
     // ★ 達成したら過去目標に保存
     if (studyType === goalSubject) {
@@ -584,8 +608,8 @@ export default function StudyTracker({ user, onLogout }) {
         setProgressMinutes(0);
       }
     }
-
   };
+
 
 
   const addSubject = async () => {
