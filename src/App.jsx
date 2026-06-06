@@ -1,23 +1,30 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-
 import Login from "./Login";
 import Register from "./Register";
 import StudyTracker from "./StudyTracker";
-import RankingPage from "./RankingPage";
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [mode, setMode] = useState("login");
 
+  // 🔥 ログイン状態を localStorage で保持
   useEffect(() => {
     const saved = localStorage.getItem("user");
+
+    // 🔥 古いデータが残っていたら削除する
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed.nickname !== "ユーザー") {
-        setUser(parsed);
+
+      // nickname が "ユーザー" なら削除してログインし直させる
+      if (parsed.nickname === "ユーザー") {
+        localStorage.removeItem("user");
+        return;
       }
+
+      setUser(parsed);
     }
   }, []);
+
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -32,47 +39,30 @@ export default function App() {
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("user");
+    setMode("login");
   };
 
+  // 🔥 user がいれば StudyTracker を表示
+  if (user) {
+    return <StudyTracker user={user} onLogout={handleLogout} />;
+  }
+
+  // 🔥 user がいないときだけ login/register
   return (
-    <Routes>
+    <div>
+      {mode === "login" && (
+        <Login
+          onLogin={handleLogin}
+          onSwitchToRegister={() => setMode("register")}
+        />
+      )}
 
-      {/* ログイン */}
-      <Route
-        path="/login"
-        element={<Login onLogin={handleLogin} onSwitchToRegister={() => {}} />}
-      />
-
-      {/* 登録 */}
-      <Route
-        path="/register"
-        element={<Register onRegister={handleRegister} onSwitchToLogin={() => {}} />}
-      />
-
-      {/* メイン画面（ログイン必須） */}
-      <Route
-        path="/"
-        element={
-          user ? (
-            <StudyTracker user={user} onLogout={handleLogout} />
-          ) : (
-            <Navigate to="/login" />
-          )
-        }
-      />
-
-      {/* ランキングページ（ログイン必須） */}
-      <Route
-        path="/ranking"
-        element={
-          user ? (
-            <RankingPage user={user} />
-          ) : (
-            <Navigate to="/login" />
-          )
-        }
-      />
-
-    </Routes>
+      {mode === "register" && (
+        <Register
+          onRegister={handleRegister}
+          onSwitchToLogin={() => setMode("login")}
+        />
+      )}
+    </div>
   );
 }
