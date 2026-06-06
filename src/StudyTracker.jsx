@@ -636,6 +636,14 @@ export default function StudyTracker({ user, onLogout }) {
     return <PastGoals user={user} onBack={() => setShowPast(false)} />;
   }
 
+  if (showRanking) {
+    return (
+      <RankingPage
+        studyRecords={studyRecords}
+        onBack={() => setShowRanking(false)}
+      />
+    );
+  }
 
   return (
 
@@ -645,9 +653,6 @@ export default function StudyTracker({ user, onLogout }) {
         <h2 className="text-xl text-blue-300 font-bold">
           ようこそ、{user.nickname} さん
         </h2>
-          <button className="bg-blue-500 p-3 rounded text-white">
-            テストボタン
-          </button>
 
         <button
           onClick={onLogout}
@@ -882,11 +887,13 @@ export default function StudyTracker({ user, onLogout }) {
         </div>
       </div>
 
-      <div className="mt-6">
-        <RankingList title="今日のランキング" data={getTodayRanking()} />
-        <RankingList title="今週のランキング" data={getWeekRanking()} />
-        <RankingList title="月間ランキング" data={getMonthRanking()} />
-      </div>
+        <button
+          onClick={() => setShowRanking(true)}
+          className="bg-blue-500 px-4 py-2 rounded"
+        >
+          ランキングを見る
+        </button>
+
 
       {/* 今日のメモ */}
       <div className="mt-6 w-full max-w-6xl">
