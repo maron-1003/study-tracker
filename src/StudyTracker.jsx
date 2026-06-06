@@ -657,13 +657,23 @@ export default function StudyTracker({ user, onLogout }) {
           ようこそ、{user.nickname} さん
         </h2>
 
-        <button
-          onClick={onLogout}
-          className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded"
-        >
-          ログアウト
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowRanking(true)}
+            className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded"
+          >
+            ランキングを見る
+          </button>
+
+          <button
+            onClick={onLogout}
+            className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded"
+          >
+            ログアウト
+          </button>
+        </div>
       </div>
+
 
       {/* 今日の目標 */}
       <div className="w-full max-w-6xl bg-gray-800 p-4 rounded mb-6">
@@ -889,14 +899,6 @@ export default function StudyTracker({ user, onLogout }) {
           </button>
         </div>
       </div>
-
-        <button
-          onClick={() => setShowRanking(true)}
-          className="bg-blue-500 px-4 py-2 rounded"
-        >
-          ランキングを見る
-        </button>
-
 
       {/* 今日のメモ */}
       <div className="mt-6 w-full max-w-6xl">
