@@ -116,12 +116,13 @@ export default function StudyTracker({ user, onLogout }) {
 
   const recordStudyTime = (minutes) => {
     const today = new Date().toISOString().split("T")[0];
+    const username = user?.nickname || user?.id || "unknown";
 
     setStudyRecords(prev => {
       const updated = {
         ...prev,
-        [user.nickname]: [
-          ...(prev[user.nickname] || []),
+        [username]: [
+          ...(prev[username] || []),
           { date: today, minutes }
         ]
       };
@@ -130,6 +131,7 @@ export default function StudyTracker({ user, onLogout }) {
       return updated;
     });
   };
+
 
   function RankingList({ title, data }) {
     return (
@@ -189,25 +191,6 @@ export default function StudyTracker({ user, onLogout }) {
 
       return { user, minutes: total };
     });
-
-    return result.sort((a, b) => b.minutes - a.minutes);
-  };
-
-  const getMonthRanking = () => {
-  const now = new Date();
-  const month = now.getMonth();
-  const year = now.getFullYear();
-
-  const result = Object.entries(studyRecords).map(([user, records]) => {
-    const total = records
-      .filter(r => {
-        const d = new Date(r.date);
-        return d.getMonth() === month && d.getFullYear() === year;
-      })
-      .reduce((sum, r) => sum + r.minutes, 0);
-
-    return { user, minutes: total };
-  });
 
     return result.sort((a, b) => b.minutes - a.minutes);
   };
@@ -655,7 +638,7 @@ export default function StudyTracker({ user, onLogout }) {
 
 
   return (
-    
+
     <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center">
       {/* ヘッダー */}
       <div className="w-full max-w-6xl flex justify-between items-center mb-6">
