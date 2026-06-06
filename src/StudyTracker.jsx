@@ -252,6 +252,7 @@ export default function StudyTracker({ user, onLogout }) {
     setStudyRecords(saved);
   }, []);
 
+
   // 勉強記録を読み込み
   useEffect(() => {
     if (!user) return;
@@ -299,13 +300,6 @@ export default function StudyTracker({ user, onLogout }) {
 
     loadSubjects();
   }, [user]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("studyRecords");
-    if (saved) {
-      setStudyRecords(JSON.parse(saved));
-    }
-  }, []);
 
   // dailyMemo を読み込み
   useEffect(() => {
