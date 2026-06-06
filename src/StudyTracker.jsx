@@ -582,9 +582,6 @@ export default function StudyTracker({ user, onLogout }) {
     setElapsed(0);
   };
 
-
-
-
   const deleteRecord = async (index) => {
     const target = records[index];
 
@@ -691,6 +688,7 @@ export default function StudyTracker({ user, onLogout }) {
   if (showPast) {
     return <PastGoals user={user} onBack={() => setShowPast(false)} />;
   }
+  console.log("userMap:", userMap);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center">
