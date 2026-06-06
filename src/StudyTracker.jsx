@@ -139,6 +139,19 @@ export default function StudyTracker({ user, onLogout }) {
     });
   };
 
+  const resetMyRanking = () => {
+    const username = user.id;
+
+    setStudyRecords(prev => {
+      const updated = {
+        ...prev,
+        [username]: []   // ← 自分の記録だけ空にする
+      };
+
+      localStorage.setItem("studyRecords", JSON.stringify(updated));
+      return updated;
+    });
+  };
 
 
 
@@ -1117,8 +1130,10 @@ export default function StudyTracker({ user, onLogout }) {
         <RankingPage
           studyRecords={studyRecords}
           userMap={{ [user.id]: user.nickname }}
+          resetMyRanking={resetMyRanking}
         />
       )}
+
 
 
     </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function RankingPage({ studyRecords, userMap }) {
+export default function RankingPage({ studyRecords, userMap, resetMyRanking }) {
   const [tab, setTab] = useState("today");
 
   const today = new Date().toISOString().split("T")[0];
@@ -38,32 +38,29 @@ export default function RankingPage({ studyRecords, userMap }) {
       .sort((a, b) => b.minutes - a.minutes);
   };
 
-  // ▼ 月間ランキング
+  // ▼ 月間ランキング（その月の1日〜末日）
   const getMonthlyRanking = () => {
     const now = new Date();
-
-    // 今月の "YYYY-MM" を作る
-    const monthStr = now.toISOString().slice(0, 7); // 例: "2026-06"
+    const monthStr = now.toISOString().slice(0, 7); // "YYYY-MM"
 
     return Object.entries(studyRecords)
-        .map(([user, records]) => {
+      .map(([user, records]) => {
         const total = records
-            .filter(r => {
+          .filter(r => {
             const dateStr =
-                typeof r.date === "string"
+              typeof r.date === "string"
                 ? r.date
                 : new Date(r.date).toISOString().slice(0, 10);
 
-            return dateStr.startsWith(monthStr); // ← 月間はこれだけでOK
-            })
-            .reduce((sum, r) => sum + r.minutes, 0);
+            return dateStr.startsWith(monthStr);
+          })
+          .reduce((sum, r) => sum + r.minutes, 0);
 
         return { user, minutes: total };
-        })
-        .filter(item => item.minutes > 0)
-        .sort((a, b) => b.minutes - a.minutes);
-    };
-
+      })
+      .filter(item => item.minutes > 0)
+      .sort((a, b) => b.minutes - a.minutes);
+  };
 
   const ranking =
     tab === "today"
@@ -109,6 +106,14 @@ export default function RankingPage({ studyRecords, userMap }) {
           }`}
         >
           月間
+        </button>
+
+        {/* ▼ リセットボタン */}
+        <button
+          onClick={resetMyRanking}
+          className="mt-6 text-left px-3 py-2 rounded bg-red-600 hover:bg-red-700"
+        >
+          自分のランキングをリセット
         </button>
 
       </div>
