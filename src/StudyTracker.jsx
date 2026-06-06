@@ -116,6 +116,8 @@ export default function StudyTracker({ user, onLogout }) {
   const [openDates, setOpenDates] = useState({});
   const [studyRecords, setStudyRecords] = useState({});
   const [activeTab, setActiveTab] = useState("home");
+  const [userMap, setUserMap] = useState({});
+
 
   const recordStudyTime = ({ minutes, date }) => {
     setStudyRecords(prev => {
@@ -254,6 +256,26 @@ export default function StudyTracker({ user, onLogout }) {
     }));
   };
   
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, nickname");
+
+      if (!error && data) {
+        const map = {};
+        data.forEach(u => {
+          map[u.id] = u.nickname;
+        });
+        setUserMap(map);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+
   // 過去の目標を読み込み
   useEffect(() => {
     const saved = localStorage.getItem("pastGoals");
@@ -1129,7 +1151,7 @@ export default function StudyTracker({ user, onLogout }) {
       {activeTab === "ranking" && (
         <RankingPage
           studyRecords={studyRecords}
-          userMap={{ [user.id]: user.nickname }}
+          userMap={userMap}
           resetMyRanking={resetMyRanking}
         />
       )}
