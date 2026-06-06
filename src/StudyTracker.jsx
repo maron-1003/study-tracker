@@ -205,12 +205,18 @@ export default function StudyTracker({ user, onLogout }) {
   };
 
   const getMonthRanking = () => {
-    const now = new Date();
-    const monthStr = now.toISOString().slice(0, 7); // "2026-06"
+    const monthStr = selectedDate.slice(0, 7); // "2026-06"
 
     const result = Object.entries(studyRecords).map(([user, records]) => {
       const total = records
-        .filter(r => r.date.startsWith(monthStr))
+        .filter(r => {
+          const dateStr =
+            typeof r.date === "string"
+              ? r.date
+              : new Date(r.date).toISOString().slice(0, 10); // ← ここが重要
+
+          return dateStr.startsWith(monthStr);
+        })
         .reduce((sum, r) => sum + r.minutes, 0);
 
       return { user, minutes: total };
@@ -218,6 +224,7 @@ export default function StudyTracker({ user, onLogout }) {
 
     return result.sort((a, b) => b.minutes - a.minutes);
   };
+
 
 
   const groupedGoals = pastGoals.reduce((acc, goal) => {
