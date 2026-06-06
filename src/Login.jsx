@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { supabase } from "./supabaseClient";
 import bcrypt from "bcryptjs";
+import { useNavigate } from "react-router-dom";
 
-export default function Login({ onLogin, onSwitchToRegister }) {
+export default function Login({ onLogin }) {
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     if (!nickname || !password) {
@@ -39,12 +42,15 @@ export default function Login({ onLogin, onSwitchToRegister }) {
 
     // ③ ログイン成功 → App.jsx にユーザー情報を渡す
     onLogin({
-    id: user.id,
-    nickname: user.nickname,
-    daily_goal: user.daily_goal
+      id: user.id,
+      nickname: user.nickname,
+      daily_goal: user.daily_goal
     });
 
     setLoading(false);
+
+    // 🔥 ④ メイン画面へ遷移
+    navigate("/");
   };
 
   return (
@@ -79,9 +85,9 @@ export default function Login({ onLogin, onSwitchToRegister }) {
         </button>
 
         <p className="text-center text-gray-400 mt-4">
-          アカウントがない？{" "}
+          アカウントがない？
           <button
-            onClick={onSwitchToRegister}
+            onClick={() => navigate("/register")}
             className="text-blue-400 underline"
           >
             新規登録
