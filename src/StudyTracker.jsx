@@ -574,8 +574,9 @@ export default function StudyTracker({ user, onLogout }) {
       </h1>
 
       {/* カレンダー＋日別グラフ */}
-      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-4 items-start">
-        <div className="bg-gray-800 p-3 rounded-xl shadow-lg border border-blue-500">
+      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-4 items-stretch">
+        {/* 左：カレンダー */}
+        <div className="bg-gray-800 p-3 rounded-xl shadow-lg border border-blue-500 h-full">
           <h2 className="text-lg font-bold text-blue-300 mb-2">日付を選択</h2>
 
           <Calendar
@@ -586,7 +587,8 @@ export default function StudyTracker({ user, onLogout }) {
           />
         </div>
 
-        <div className="bg-gray-800 p-3 rounded-xl shadow-lg flex flex-col h-fit">
+        {/* 右：グラフ */}
+        <div className="bg-gray-800 p-3 rounded-xl shadow-lg flex flex-col h-full">
           <h2 className="text-lg font-bold mb-2 text-blue-300">
             {selectedDate} の勉強割合
           </h2>
@@ -598,7 +600,7 @@ export default function StudyTracker({ user, onLogout }) {
                 maintainAspectRatio: false,
                 responsive: true,
               }}
-              style={{ height: "160px" }}   // ← ここが一番効く
+              style={{ height: "160px" }}
             />
           ) : (
             <p className="text-gray-400">この日の記録はありません</p>
