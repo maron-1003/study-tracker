@@ -115,7 +115,6 @@ export default function StudyTracker({ user, onLogout }) {
   const [pastGoals, setPastGoals] = useState([]);
   const [openDates, setOpenDates] = useState({});
   const [studyRecords, setStudyRecords] = useState({});
-  const [showRanking, setShowRanking] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
 
   const recordStudyTime = ({ minutes, date }) => {
@@ -653,16 +652,6 @@ export default function StudyTracker({ user, onLogout }) {
   if (showPast) {
     return <PastGoals user={user} onBack={() => setShowPast(false)} />;
   }
-
-  if (showRanking) {
-    return (
-      <RankingPage
-        studyRecords={studyRecords}
-        onBack={() => setShowRanking(false)}
-      />
-    );
-  }
-
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center">
