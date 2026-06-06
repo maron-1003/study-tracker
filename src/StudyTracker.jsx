@@ -873,11 +873,20 @@ export default function StudyTracker({ user, onLogout }) {
               {goalSubject} の目標 {dailyGoal} 分を達成しました！
             </p>
             <button
-              onClick={() => {
-                setGoalAchieved(false);
-                // ❌ setGoalTriggered(false) ← これがループの原因
-              }}
-              className="px-4 py-2 bg-white text-green-700 font-bold rounded"
+                onClick={() => {
+                  // 過去の目標に追加
+                  setPastGoals((prev) => [
+                    ...prev,
+                    {
+                      subject: goalSubject,
+                      goal: dailyGoal,
+                      achievedAt: new Date().toISOString(),
+                    },
+                  ]);
+
+                  setGoalAchieved(false);
+                }}              
+                className="px-4 py-2 bg-white text-green-700 font-bold rounded"
             >
               閉じる
             </button>
@@ -891,7 +900,19 @@ export default function StudyTracker({ user, onLogout }) {
           <div className="bg-gray-800 p-6 rounded-lg w-80">
             <h2 className="text-xl font-bold mb-4">過去の目標</h2>
 
-            <p className="text-gray-300">ここに過去の目標一覧を表示</p>
+              <div className="text-gray-300 space-y-2 max-h-60 overflow-y-auto">
+                {pastGoals.length === 0 ? (
+                  <p>まだ過去の目標がありません</p>
+                ) : (
+                  pastGoals.map((g, i) => (
+                    <div key={i} className="p-2 bg-gray-700 rounded">
+                      <p>教科: {g.subject}</p>
+                      <p>目標: {g.goal} 分</p>
+                      <p>達成日: {new Date(g.achievedAt).toLocaleString()}</p>
+                    </div>
+                  ))
+                )}
+              </div>
 
             <button
               onClick={() => setIsPastGoalsOpen(false)}
