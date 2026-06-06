@@ -512,7 +512,6 @@ export default function StudyTracker({ user, onLogout }) {
       minute: "2-digit",
     });
 
-    // ★ ランキング用に必ず YYYY-MM-DD を使う
     const date = selectedDate;
 
     await addRecord({
@@ -523,13 +522,16 @@ export default function StudyTracker({ user, onLogout }) {
       end: endStr,
     });
 
-    // ★ 目標教科なら progressMinutes を積み上げる
+    // ★ ランキングにも反映（これが抜けていた）
+    recordStudyTime({
+      minutes,
+      date,
+    });
+
     if (studyType === goalSubject) {
       setProgressMinutes(prev => prev + minutes);
     }
 
-
-    // ★ 達成したら過去目標に保存
     if (studyType === goalSubject) {
       const updated = progressMinutes + minutes;
 
@@ -547,6 +549,7 @@ export default function StudyTracker({ user, onLogout }) {
     setStartTime(null);
     setElapsed(0);
   };
+
 
 
 
