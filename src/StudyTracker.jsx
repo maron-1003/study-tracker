@@ -1154,7 +1154,6 @@ export default function StudyTracker({ user, onLogout }) {
       )}
 
 
-
     </div>
   );
 
