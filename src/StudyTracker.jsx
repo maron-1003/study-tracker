@@ -480,6 +480,12 @@ export default function StudyTracker({ user, onLogout }) {
 
   // 共通のレコード追加関数
   const addRecord = async ({ subject, minutes, date, start = "--", end = "--" }) => {
+    const today = dayjs().format("YYYY-MM-DD");
+    if (date > today) {
+      alert("未来の日付には勉強時間を記録できません");
+      return false;
+    }
+
     const { data, error } = await supabase
       .from("study_records")
       .insert([
@@ -506,7 +512,10 @@ export default function StudyTracker({ user, onLogout }) {
       }));
 
       setRecords((prev) => [...prev, ...converted]);
+      return true;
     }
+
+    return false;
   };
 
   const handleStart = () => {
@@ -548,13 +557,19 @@ export default function StudyTracker({ user, onLogout }) {
 
     const date = selectedDate;
 
-    await addRecord({
+    const wasAdded = await addRecord({
       subject: studyType,
       minutes,
       date,
       start: startStr,
       end: endStr,
     });
+
+    if (!wasAdded) {
+      setStartTime(null);
+      setElapsed(0);
+      return;
+    }
 
     // ★ ランキングにも反映（これが抜けていた）
     recordStudyTime({
@@ -603,11 +618,13 @@ export default function StudyTracker({ user, onLogout }) {
       return;
     }
 
-    await addRecord({
+    const wasAdded = await addRecord({
       subject: studyType,
       minutes,
       date: selectedDate,
     });
+
+    if (!wasAdded) return;
 
     // ★ ランキングにも反映させる（重要）
     recordStudyTime({
@@ -823,6 +840,7 @@ export default function StudyTracker({ user, onLogout }) {
                   setSelectedDate(dayjs(value).format("YYYY-MM-DD"))
                 }
                 value={new Date(selectedDate)}
+                maxDate={new Date()}
               />
             </div>
 

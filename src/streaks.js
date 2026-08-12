@@ -13,10 +13,11 @@ const previousDate = (dateString) => {
 };
 
 export const getStreakStats = (records, today = new Date()) => {
+  const todayString = toLocalDateString(today);
   const studyDates = new Set(
     records
       .map((record) => record.date)
-      .filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(date))
+      .filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(date) && date <= todayString)
   );
 
   const sortedDates = [...studyDates].sort();
@@ -31,7 +32,7 @@ export const getStreakStats = (records, today = new Date()) => {
   });
 
   let currentStreak = 0;
-  let cursor = toLocalDateString(today);
+  let cursor = todayString;
   while (studyDates.has(cursor)) {
     currentStreak += 1;
     cursor = previousDate(cursor);

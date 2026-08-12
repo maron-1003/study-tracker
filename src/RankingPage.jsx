@@ -55,7 +55,7 @@ export default function RankingPage({ user }) {
       const isIncluded =
         (tab === "today" && record.date === todayString) ||
         (tab === "week" && record.date >= weekStartString && record.date <= todayString) ||
-        (tab === "month" && record.date.startsWith(monthString));
+        (tab === "month" && record.date.startsWith(monthString) && record.date <= todayString);
 
       if (isIncluded) {
         result[record.user_id] = (result[record.user_id] ?? 0) + record.minutes;
