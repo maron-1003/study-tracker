@@ -1,152 +1,125 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "./supabaseClient";
 
-export default function RankingPage({ studyRecords, userMap, resetMyRanking }) {
+const toDateString = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+export default function RankingPage({ user }) {
   const [tab, setTab] = useState("today");
+  const [records, setRecords] = useState([]);
+  const [userMap, setUserMap] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const today = new Date().toISOString().split("T")[0];
+  const loadRankingData = async () => {
+    setIsLoading(true);
+    setErrorMessage("");
 
-  // ▼ 今日のランキング
-  const getTodayRanking = () => {
-    return Object.entries(studyRecords)
-      .map(([user, records]) => {
-        const total = records
-          .filter(r => r.date === today)
-          .reduce((sum, r) => sum + r.minutes, 0);
-        return { user, minutes: total };
-      })
-      .filter(item => item.minutes > 0)
-      .sort((a, b) => b.minutes - a.minutes);
+    const [{ data: recordData, error: recordError }, { data: usersData, error: usersError }] =
+      await Promise.all([
+        supabase.from("study_records").select("user_id, minutes, date"),
+        supabase.from("users").select("id, nickname"),
+      ]);
+
+    if (recordError || usersError) {
+      setErrorMessage("ランキングを読み込めませんでした。権限設定を確認してください。");
+      setIsLoading(false);
+      return;
+    }
+
+    setRecords(recordData ?? []);
+    setUserMap(
+      Object.fromEntries((usersData ?? []).map(({ id, nickname }) => [id, nickname]))
+    );
+    setIsLoading(false);
   };
 
-  // ▼ 週間ランキング
-  const getWeeklyRanking = () => {
-    const now = new Date();
-    const weekAgo = new Date(now);
-    weekAgo.setDate(now.getDate() - 6);
+  useEffect(() => {
+    loadRankingData();
+  }, []);
 
-    return Object.entries(studyRecords)
-      .map(([user, records]) => {
-        const total = records
-          .filter(r => {
-            const d = new Date(r.date);
-            return d >= weekAgo && d <= now;
-          })
-          .reduce((sum, r) => sum + r.minutes, 0);
-        return { user, minutes: total };
-      })
-      .filter(item => item.minutes > 0)
+  const ranking = useMemo(() => {
+    const today = new Date();
+    const todayString = toDateString(today);
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - 6);
+    const weekStartString = toDateString(weekStart);
+    const monthString = todayString.slice(0, 7);
+
+    const totals = records.reduce((result, record) => {
+      const isIncluded =
+        (tab === "today" && record.date === todayString) ||
+        (tab === "week" && record.date >= weekStartString && record.date <= todayString) ||
+        (tab === "month" && record.date.startsWith(monthString));
+
+      if (isIncluded) {
+        result[record.user_id] = (result[record.user_id] ?? 0) + record.minutes;
+      }
+      return result;
+    }, {});
+
+    return Object.entries(totals)
+      .map(([userId, minutes]) => ({ userId, minutes }))
       .sort((a, b) => b.minutes - a.minutes);
-  };
+  }, [records, tab]);
 
-  // ▼ 月間ランキング（その月の1日〜末日）
-  const getMonthlyRanking = () => {
-    const now = new Date();
-    const monthStr = now.toISOString().slice(0, 7); // "YYYY-MM"
-
-    return Object.entries(studyRecords)
-      .map(([user, records]) => {
-        const total = records
-          .filter(r => {
-            const dateStr =
-              typeof r.date === "string"
-                ? r.date
-                : new Date(r.date).toISOString().slice(0, 10);
-
-            return dateStr.startsWith(monthStr);
-          })
-          .reduce((sum, r) => sum + r.minutes, 0);
-
-        return { user, minutes: total };
-      })
-      .filter(item => item.minutes > 0)
-      .sort((a, b) => b.minutes - a.minutes);
-  };
-
-  const ranking =
-    tab === "today"
-      ? getTodayRanking()
-      : tab === "week"
-      ? getWeeklyRanking()
-      : getMonthlyRanking();
+  const myRank = ranking.findIndex((item) => item.userId === user.id) + 1;
+  const labels = { today: "今日", week: "過去7日間", month: "今月" };
 
   return (
     <div className="w-full max-w-5xl mx-auto text-white flex gap-6">
-
-      {/* ▼ 縦タブ */}
-      <div className="w-40 flex flex-col gap-3 border-r border-gray-700 pr-4">
-
+      <aside className="w-40 flex flex-col gap-3 border-r border-gray-700 pr-4">
+        {Object.entries(labels).map(([value, label]) => (
+          <button
+            key={value}
+            onClick={() => setTab(value)}
+            className={`text-left px-3 py-2 rounded ${
+              tab === value
+                ? "bg-blue-600 text-white"
+                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
         <button
-          onClick={() => setTab("today")}
-          className={`text-left px-3 py-2 rounded ${
-            tab === "today"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-          }`}
+          onClick={loadRankingData}
+          className="mt-3 text-left px-3 py-2 rounded bg-gray-700 hover:bg-gray-600"
         >
-          今日
+          更新
         </button>
+      </aside>
 
-        <button
-          onClick={() => setTab("week")}
-          className={`text-left px-3 py-2 rounded ${
-            tab === "week"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-          }`}
-        >
-          週間
-        </button>
-
-        <button
-          onClick={() => setTab("month")}
-          className={`text-left px-3 py-2 rounded ${
-            tab === "month"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-          }`}
-        >
-          月間
-        </button>
-
-        {/* ▼ リセットボタン */}
-        <button
-          onClick={resetMyRanking}
-          className="mt-6 text-left px-3 py-2 rounded bg-red-600 hover:bg-red-700"
-        >
-          自分のランキングをリセット
-        </button>
-
-      </div>
-
-      {/* ▼ ランキング内容 */}
-      <div className="flex-1">
-
-        <h1 className="text-3xl font-bold mb-6">
-          {tab === "today"
-            ? "今日のランキング"
-            : tab === "week"
-            ? "週間ランキング"
-            : "月間ランキング"}
-        </h1>
+      <main className="flex-1">
+        <h1 className="text-3xl font-bold mb-2">{labels[tab]}のランキング</h1>
+        <p className="text-gray-400 mb-6">
+          {myRank ? `あなたの順位: ${myRank}位` : "この期間のあなたの記録はまだありません"}
+        </p>
 
         <div className="bg-gray-800 p-4 rounded-lg shadow-lg">
-          {ranking.length === 0 && (
-            <p className="text-gray-400">まだ記録がありません</p>
+          {isLoading && <p className="text-gray-400">読み込み中...</p>}
+          {!isLoading && errorMessage && <p className="text-red-400">{errorMessage}</p>}
+          {!isLoading && !errorMessage && ranking.length === 0 && (
+            <p className="text-gray-400">この期間の記録はまだありません</p>
           )}
-
-          {ranking.map((item, index) => (
+          {!isLoading && !errorMessage && ranking.map((item, index) => (
             <div
-              key={index}
-              className="flex justify-between p-3 border-b border-gray-700"
+              key={item.userId}
+              className={`flex justify-between p-3 border-b border-gray-700 ${
+                item.userId === user.id ? "bg-blue-900/40" : ""
+              }`}
             >
               <span>{index + 1}位</span>
-              <span>{userMap[item.user] || item.user}</span>
+              <span>{userMap[item.userId] ?? "名無し"}</span>
               <span>{item.minutes}分</span>
             </div>
           ))}
         </div>
-
-      </div>
+      </main>
     </div>
   );
 }

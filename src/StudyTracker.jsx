@@ -1147,9 +1147,7 @@ export default function StudyTracker({ user, onLogout }) {
       {/* ▼ ランキングタブ */}
       {activeTab === "ranking" && (
         <RankingPage
-          studyRecords={studyRecords}
-          userMap={userMap}
-          resetMyRanking={resetMyRanking}
+          user={user}
         />
       )}
 
