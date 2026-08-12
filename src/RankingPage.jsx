@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "./supabaseClient";
+import { getStreakStats } from "./streaks";
 
 const toDateString = (date) => {
   const year = date.getFullYear();
@@ -68,6 +69,19 @@ export default function RankingPage({ user }) {
   }, [records, tab]);
 
   const myRank = ranking.findIndex((item) => item.userId === user.id) + 1;
+  const streaksByUser = useMemo(() => {
+    const recordsByUser = records.reduce((result, record) => {
+      (result[record.user_id] ??= []).push(record);
+      return result;
+    }, {});
+
+    return Object.fromEntries(
+      Object.entries(recordsByUser).map(([userId, userRecords]) => [
+        userId,
+        getStreakStats(userRecords),
+      ])
+    );
+  }, [records]);
   const labels = { today: "今日", week: "過去7日間", month: "今月" };
 
   return (
@@ -115,6 +129,9 @@ export default function RankingPage({ user }) {
             >
               <span>{index + 1}位</span>
               <span>{userMap[item.userId] ?? "名無し"}</span>
+              <span className="text-orange-300">
+                🔥 {streaksByUser[item.userId]?.currentStreak ?? 0}日連続
+              </span>
               <span>{item.minutes}分</span>
             </div>
           ))}

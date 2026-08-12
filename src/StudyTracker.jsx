@@ -19,6 +19,7 @@ import { supabase } from "./supabaseClient";
 import { savePastGoal } from "./pastGoals/savePastGoal";
 import PastGoals from "./pastGoals/PastGoals";
 import RankingPage from "./RankingPage";
+import { getStreakStats } from "./streaks";
 
 
 ChartJS.register(
@@ -101,6 +102,7 @@ export default function StudyTracker({ user, onLogout }) {
 
   const subjectTotals = getSubjectTotals(records);
   const subjectMinutes = subjectTotals[goalSubject] || 0;
+  const streakStats = getStreakStats(records);
 
   const openGoalSetting = () => {
     setIsGoalSettingOpen(true);
@@ -725,6 +727,11 @@ export default function StudyTracker({ user, onLogout }) {
             <h2 className="text-xl text-blue-300 font-bold">
               ようこそ、{user.nickname} さん
             </h2>
+
+            <div className="text-right text-sm text-orange-300">
+              <p>🔥 {streakStats.currentStreak}日連続で勉強中</p>
+              <p className="text-gray-400">自己ベスト: {streakStats.bestStreak}日</p>
+            </div>
 
             <button
               onClick={onLogout}
