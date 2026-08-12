@@ -808,19 +808,37 @@ export default function StudyTracker({ user, onLogout }) {
               color: white !important;
               border-radius: 8px;
             }
+            .react-calendar__month-view__days__day--neighboringMonth {
+              color: #6b7280 !important;
+            }
             .react-calendar__tile--active {
               background: #2563eb !important;
               color: white !important;
               box-shadow: 0 0 10px #3b82f6;
             }
-            .react-calendar__tile:hover {
+            .react-calendar__tile:enabled:hover,
+            .react-calendar__tile:enabled:focus {
               background: #1e40af !important;
+            }
+            .react-calendar__tile:disabled {
+              color: #4b5563 !important;
+              cursor: not-allowed;
             }
             .react-calendar__tile--now {
               background: rgba(59, 130, 246, 0.3) !important;
               border: 2px solid #3b82f6 !important;
               color: #ffffff !important;
               box-shadow: 0 0 12px #3b82f6;
+            }
+            .react-calendar__navigation button {
+              color: #dbeafe !important;
+              border-radius: 8px;
+              font-weight: 700;
+            }
+            .react-calendar__navigation button:enabled:hover,
+            .react-calendar__navigation button:enabled:focus {
+              background: #2563eb !important;
+              color: #ffffff !important;
             }
           `}</style>
 
@@ -840,7 +858,9 @@ export default function StudyTracker({ user, onLogout }) {
                   setSelectedDate(dayjs(value).format("YYYY-MM-DD"))
                 }
                 value={new Date(selectedDate)}
-                maxDate={new Date()}
+                tileDisabled={({ date, view }) =>
+                  view === "month" && dayjs(date).isAfter(dayjs(), "day")
+                }
               />
             </div>
 
