@@ -20,6 +20,8 @@ import { savePastGoal } from "./pastGoals/savePastGoal";
 import PastGoals from "./pastGoals/PastGoals";
 import RankingPage from "./RankingPage";
 import { getStreakStats } from "./streaks";
+import PomodoroTimer from "./PomodoroTimer";
+import PeriodGoals from "./PeriodGoals";
 
 
 ChartJS.register(
@@ -654,6 +656,33 @@ export default function StudyTracker({ user, onLogout }) {
     }
   };
 
+  const handlePomodoroFocusComplete = async (minutes) => {
+    if (!studyType) return false;
+
+    const now = new Date();
+    const date = dayjs(now).format("YYYY-MM-DD");
+    const end = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const start = new Date(now.getTime() - minutes * 60 * 1000).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const wasAdded = await addRecord({
+      subject: studyType,
+      minutes,
+      date,
+      start,
+      end,
+    });
+
+    if (!wasAdded) return false;
+
+    recordStudyTime({ minutes, date });
+    if (studyType === goalSubject) {
+      setProgressMinutes((previous) => previous + minutes);
+    }
+    return true;
+  };
+
 
 
   const addSubject = async () => {
@@ -890,6 +919,15 @@ export default function StudyTracker({ user, onLogout }) {
 
           </div>
 
+          <div className="mt-6 w-full">
+            <PeriodGoals
+              userId={user.id}
+              subjects={subjects}
+              records={records}
+              selectedDate={selectedDate}
+            />
+          </div>
+
           {/* ▼ タイマー */}
           <div className="w-full max-w-4xl bg-gray-800 p-6 rounded-xl shadow-lg mt-10">
             <select
@@ -982,6 +1020,11 @@ export default function StudyTracker({ user, onLogout }) {
               <button onClick={() => addTestTime(30)} className="bg-blue-500 p-2 rounded">+30分</button>
               <button onClick={() => addTestTime(60)} className="bg-blue-500 p-2 rounded">+60分</button>
             </div>
+
+            <PomodoroTimer
+              subject={studyType}
+              onFocusComplete={handlePomodoroFocusComplete}
+            />
           </div>
 
           {/* ▼ 今日のメモ */}
