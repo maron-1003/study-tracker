@@ -836,7 +836,7 @@ export default function StudyTracker({ user, onLogout }) {
     <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center">
 
       {/* ▼ タブバー */}
-      <div className="w-full max-w-6xl flex gap-6 mb-6 border-b border-gray-700 pb-2">
+      <div className="w-full max-w-6xl flex flex-wrap gap-6 mb-6 border-b border-gray-700 pb-2">
         <button
           onClick={() => setActiveTab("home")}
           className={`pb-2 ${
@@ -857,6 +857,28 @@ export default function StudyTracker({ user, onLogout }) {
           }`}
         >
           ランキング
+        </button>
+
+        <button
+          onClick={() => setActiveTab("badges")}
+          className={`pb-2 ${
+            activeTab === "badges"
+              ? "text-blue-400 border-b-2 border-blue-400"
+              : "text-gray-400"
+          }`}
+        >
+          バッジ
+        </button>
+
+        <button
+          onClick={() => setActiveTab("notifications")}
+          className={`pb-2 ${
+            activeTab === "notifications"
+              ? "text-blue-400 border-b-2 border-blue-400"
+              : "text-gray-400"
+          }`}
+        >
+          通知設定
         </button>
       </div>
 
@@ -1022,15 +1044,6 @@ export default function StudyTracker({ user, onLogout }) {
               selectedDate={selectedDate}
               goalNotificationsEnabled={notificationSettings.goal}
               onGoalReached={notifyPeriodGoalReached}
-            />
-          </div>
-
-          <div className="mt-6 w-full max-w-6xl space-y-6">
-            <AchievementsPanel achievements={achievements} />
-            <NotificationSettings
-              settings={notificationSettings}
-              onToggle={toggleNotificationSetting}
-              onTest={testNotification}
             />
           </div>
 
@@ -1343,6 +1356,18 @@ export default function StudyTracker({ user, onLogout }) {
       {activeTab === "ranking" && (
         <RankingPage
           user={user}
+        />
+      )}
+
+      {activeTab === "badges" && (
+        <AchievementsPanel achievements={achievements} />
+      )}
+
+      {activeTab === "notifications" && (
+        <NotificationSettings
+          settings={notificationSettings}
+          onToggle={toggleNotificationSetting}
+          onTest={testNotification}
         />
       )}
 

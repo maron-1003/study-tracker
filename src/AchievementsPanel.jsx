@@ -5,7 +5,7 @@ export default function AchievementsPanel({ achievements }) {
     <section className="w-full max-w-6xl rounded-xl bg-gray-800 p-5 shadow-lg">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-yellow-300">バッジ・実績</h2>
+          <h2 className="text-xl font-bold text-yellow-300">バッジ</h2>
           <p className="text-sm text-gray-400">獲得数: {earnedCount} / {achievements.length}</p>
         </div>
       </div>
