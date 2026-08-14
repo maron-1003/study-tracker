@@ -919,7 +919,7 @@ export default function StudyTracker({ user, onLogout }) {
 
           </div>
 
-          <div className="mt-6 w-full">
+          <div className="mt-6 w-full max-w-4xl">
             <PeriodGoals
               userId={user.id}
               subjects={subjects}
