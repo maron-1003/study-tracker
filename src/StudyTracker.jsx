@@ -25,6 +25,7 @@ import PeriodGoals from "./PeriodGoals";
 import AchievementsPanel from "./AchievementsPanel";
 import NotificationSettings from "./NotificationSettings";
 import TasksPage from "./TasksPage";
+import GroupsPage from "./GroupsPage";
 import { getAchievements } from "./achievements";
 import {
   loadNotificationSettings,
@@ -872,6 +873,17 @@ export default function StudyTracker({ user, onLogout }) {
         </button>
 
         <button
+          onClick={() => setActiveTab("groups")}
+          className={`pb-2 ${
+            activeTab === "groups"
+              ? "text-blue-400 border-b-2 border-blue-400"
+              : "text-gray-400"
+          }`}
+        >
+          グループ
+        </button>
+
+        <button
           onClick={() => setActiveTab("badges")}
           className={`pb-2 ${
             activeTab === "badges"
@@ -1374,6 +1386,8 @@ export default function StudyTracker({ user, onLogout }) {
       {activeTab === "tasks" && (
         <TasksPage userId={user.id} subjects={subjects} />
       )}
+
+      {activeTab === "groups" && <GroupsPage user={user} />}
 
       {activeTab === "badges" && (
         <AchievementsPanel achievements={achievements} />
