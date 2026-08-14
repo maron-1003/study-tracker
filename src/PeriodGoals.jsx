@@ -7,8 +7,9 @@ dayjs.extend(isoWeek);
 const storageKey = (userId) => `periodGoals:${userId}`;
 
 const minutesLabel = (minutes) => {
-  if (minutes >= 60 && minutes % 60 === 0) return `${minutes / 60}時間`;
-  return `${minutes}分`;
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return hours > 0 ? `${hours}時間${remainingMinutes}分` : `${remainingMinutes}分`;
 };
 
 const getRange = (date, period) => {
