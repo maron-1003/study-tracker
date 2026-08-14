@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 
@@ -19,7 +19,14 @@ const getRange = (date, period) => {
   return { start: start.format("YYYY-MM-DD"), end: end.format("YYYY-MM-DD") };
 };
 
-export default function PeriodGoals({ userId, subjects, records, selectedDate }) {
+export default function PeriodGoals({
+  userId,
+  subjects,
+  records,
+  selectedDate,
+  goalNotificationsEnabled,
+  onGoalReached,
+}) {
   const [goals, setGoals] = useState(() => {
     const saved = localStorage.getItem(storageKey(userId));
     return saved ? JSON.parse(saved) : [];
@@ -27,6 +34,9 @@ export default function PeriodGoals({ userId, subjects, records, selectedDate })
   const [subject, setSubject] = useState(() => subjects[0] ?? "");
   const [period, setPeriod] = useState("week");
   const [targetMinutes, setTargetMinutes] = useState(300);
+  const notifiedGoalKeys = useRef(
+    new Set(JSON.parse(localStorage.getItem(`notifiedPeriodGoals:${userId}`) || "[]"))
+  );
 
   const updateGoals = (nextGoals) => {
     setGoals(nextGoals);
@@ -57,6 +67,29 @@ export default function PeriodGoals({ userId, subjects, records, selectedDate })
     }),
     [goals, records, selectedDate]
   );
+
+  useEffect(() => {
+    if (!goalNotificationsEnabled) return;
+
+    const newlyReached = goalProgress.filter((goal) => {
+      const range = getRange(selectedDate, goal.period);
+      const key = `${goal.id}:${range.start}`;
+      return goal.actualMinutes >= goal.targetMinutes && !notifiedGoalKeys.current.has(key);
+    });
+
+    newlyReached.forEach((goal) => {
+      const range = getRange(selectedDate, goal.period);
+      notifiedGoalKeys.current.add(`${goal.id}:${range.start}`);
+      onGoalReached(goal);
+    });
+
+    if (newlyReached.length > 0) {
+      localStorage.setItem(
+        `notifiedPeriodGoals:${userId}`,
+        JSON.stringify([...notifiedGoalKeys.current])
+      );
+    }
+  }, [goalNotificationsEnabled, goalProgress, onGoalReached, selectedDate, userId]);
 
   return (
     <section className="w-full max-w-6xl rounded-xl bg-gray-800 p-5 shadow-lg">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Doughnut, Bar, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -22,6 +22,14 @@ import RankingPage from "./RankingPage";
 import { getStreakStats } from "./streaks";
 import PomodoroTimer from "./PomodoroTimer";
 import PeriodGoals from "./PeriodGoals";
+import AchievementsPanel from "./AchievementsPanel";
+import NotificationSettings from "./NotificationSettings";
+import { getAchievements } from "./achievements";
+import {
+  loadNotificationSettings,
+  saveNotificationSettings,
+  sendBrowserNotification,
+} from "./notifications";
 
 
 ChartJS.register(
@@ -99,12 +107,22 @@ export default function StudyTracker({ user, onLogout }) {
   );
 
   const [progressMinutes, setProgressMinutes] = useState(0);
+  const [notificationSettings, setNotificationSettings] = useState(() =>
+    loadNotificationSettings(user.id)
+  );
 
   const timerRef = useRef(null);
 
   const subjectTotals = getSubjectTotals(records);
   const subjectMinutes = subjectTotals[goalSubject] || 0;
   const streakStats = getStreakStats(records);
+  const achievements = useMemo(
+    () => getAchievements({ records, goalSubject, dailyGoal }),
+    [dailyGoal, goalSubject, records]
+  );
+  const notifiedAchievementIds = useRef(
+    new Set(JSON.parse(localStorage.getItem(`notifiedAchievements:${user.id}`) || "[]"))
+  );
 
   const openGoalSetting = () => {
     setIsGoalSettingOpen(true);
@@ -413,10 +431,58 @@ export default function StudyTracker({ user, onLogout }) {
     if (progressMinutes >= dailyGoal && !goalTriggered) {
       setGoalAchieved(true);
       setGoalTriggered(true);
+      if (notificationSettings.goal) {
+        void sendBrowserNotification(
+          "目標達成！",
+          `${goalSubject}の今日の目標 ${dailyGoal}分を達成しました。`
+        );
+      }
       // setShowEffect(true);
       // setTimeout(() => setShowEffect(false), 2000);
     }
-  }, [progressMinutes, dailyGoal, goalTriggered]);
+  }, [progressMinutes, dailyGoal, goalTriggered, goalSubject, notificationSettings.goal]);
+
+  useEffect(() => {
+    if (!notificationSettings.achievement) return;
+
+    const newlyEarned = achievements.filter(
+      (achievement) => achievement.earned && !notifiedAchievementIds.current.has(achievement.id)
+    );
+    if (newlyEarned.length === 0) return;
+
+    newlyEarned.forEach((achievement) => {
+      notifiedAchievementIds.current.add(achievement.id);
+      void sendBrowserNotification(
+        "バッジを獲得！",
+        `${achievement.icon} ${achievement.name}を獲得しました。`
+      );
+    });
+    localStorage.setItem(
+      `notifiedAchievements:${user.id}`,
+      JSON.stringify([...notifiedAchievementIds.current])
+    );
+  }, [achievements, notificationSettings.achievement, user.id]);
+
+  useEffect(() => {
+    if (!notificationSettings.reminder) return undefined;
+
+    const checkReminder = () => {
+      const now = new Date();
+      if (now.getHours() < 20) return;
+
+      const today = dayjs(now).format("YYYY-MM-DD");
+      const hasStudiedToday = records.some((record) => record.date === today);
+      const reminderKey = `studyReminderSent:${user.id}`;
+      if (hasStudiedToday || localStorage.getItem(reminderKey) === today) return;
+
+      localStorage.setItem(reminderKey, today);
+      void sendBrowserNotification("勉強リマインド", "今日はまだ勉強記録がありません。5分だけでも始めてみよう！");
+    };
+
+    checkReminder();
+    const intervalId = setInterval(checkReminder, 60 * 1000);
+    return () => clearInterval(intervalId);
+  }, [notificationSettings.reminder, records, user.id]);
 
   const colorMap = {
     英語: "#3b82f6",
@@ -683,6 +749,35 @@ export default function StudyTracker({ user, onLogout }) {
     return true;
   };
 
+  const toggleNotificationSetting = (type) => {
+    const nextSettings = {
+      ...notificationSettings,
+      [type]: !notificationSettings[type],
+    };
+    setNotificationSettings(nextSettings);
+    saveNotificationSettings(user.id, nextSettings);
+  };
+
+  const testNotification = (type) => {
+    const testMessages = {
+      pomodoro: ["ポモドーロのテスト", "集中時間が終わりました。休憩しましょう！"],
+      achievement: ["バッジ獲得のテスト", "🏆 1週間継続を獲得しました！"],
+      goal: ["目標達成のテスト", "🎯 英語の週間目標を達成しました！"],
+      reminder: ["勉強リマインドのテスト", "今日はまだ勉強記録がありません。5分だけでも始めよう！"],
+    };
+    const [title, body] = testMessages[type];
+    void sendBrowserNotification(title, body);
+  };
+
+  const notifyPeriodGoalReached = (goal) => {
+    if (!notificationSettings.goal) return;
+    const periodLabel = goal.period === "week" ? "週間" : "月間";
+    void sendBrowserNotification(
+      "目標達成！",
+      `${goal.subject}の${periodLabel}目標 ${goal.targetMinutes}分を達成しました。`
+    );
+  };
+
 
 
   const addSubject = async () => {
@@ -925,6 +1020,17 @@ export default function StudyTracker({ user, onLogout }) {
               subjects={subjects}
               records={records}
               selectedDate={selectedDate}
+              goalNotificationsEnabled={notificationSettings.goal}
+              onGoalReached={notifyPeriodGoalReached}
+            />
+          </div>
+
+          <div className="mt-6 w-full max-w-6xl space-y-6">
+            <AchievementsPanel achievements={achievements} />
+            <NotificationSettings
+              settings={notificationSettings}
+              onToggle={toggleNotificationSetting}
+              onTest={testNotification}
             />
           </div>
 
@@ -1024,6 +1130,7 @@ export default function StudyTracker({ user, onLogout }) {
             <PomodoroTimer
               subject={studyType}
               onFocusComplete={handlePomodoroFocusComplete}
+              notificationsEnabled={notificationSettings.pomodoro}
             />
           </div>
 

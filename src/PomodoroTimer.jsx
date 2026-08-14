@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { requestNotificationPermission, sendBrowserNotification } from "./notifications";
 
 const presets = [
   { id: "25-5", label: "25分集中 / 5分休憩", focus: 25, break: 5 },
@@ -11,7 +12,7 @@ const formatTime = (seconds) => {
   return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
 };
 
-export default function PomodoroTimer({ subject, onFocusComplete }) {
+export default function PomodoroTimer({ subject, onFocusComplete, notificationsEnabled }) {
   const [presetId, setPresetId] = useState("25-5");
   const [phase, setPhase] = useState("focus");
   const [remainingSeconds, setRemainingSeconds] = useState(25 * 60);
@@ -25,17 +26,8 @@ export default function PomodoroTimer({ subject, onFocusComplete }) {
   );
 
   const notify = useCallback(async (body) => {
-    if (!("Notification" in window)) return;
-
-    const permission =
-      Notification.permission === "default"
-        ? await Notification.requestPermission()
-        : Notification.permission;
-
-    if (permission === "granted") {
-      new Notification("Study Tracker", { body });
-    }
-  }, []);
+    if (notificationsEnabled) await sendBrowserNotification("Study Tracker", body);
+  }, [notificationsEnabled]);
 
   const reset = () => {
     clearInterval(timerRef.current);
@@ -91,9 +83,7 @@ export default function PomodoroTimer({ subject, onFocusComplete }) {
       return;
     }
 
-    if ("Notification" in window && Notification.permission === "default") {
-      await Notification.requestPermission();
-    }
+    if (notificationsEnabled) await requestNotificationPermission();
     setMessage("");
     setIsRunning(true);
   };
