@@ -1089,6 +1089,18 @@ export default function StudyTracker({ user, onLogout }) {
             .sunday-day:hover {
               filter: brightness(1.08);
             }
+            .holiday-badge {
+              position: absolute;
+              right: 4px;
+              bottom: 4px;
+              font-size: 10px;
+              line-height: 1;
+              padding: 2px 4px;
+              border-radius: 999px;
+              background: rgba(250, 204, 21, 0.28);
+              color: #fef3c7;
+              border: 1px solid rgba(250, 204, 21, 0.7);
+            }
           `}</style>
 
           <h1 className="text-4xl font-extrabold text-blue-400 mb-8 drop-shadow-[0_0_10px_#3b82f6]">
@@ -1104,6 +1116,7 @@ export default function StudyTracker({ user, onLogout }) {
 
               <Calendar
                 locale="ja-JP"
+                calendarType="gregory"
                 calendarStartDay={0}
                 formatShortWeekday={(locale, date) => ["日", "月", "火", "水", "木", "金", "土"][date.getDay()]}
                 formatLongWeekday={(locale, date) => ["日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"][date.getDay()]}
@@ -1125,6 +1138,11 @@ export default function StudyTracker({ user, onLogout }) {
                   if (holidayName) classes.push("holiday-day");
 
                   return classes.join(" ");
+                }}
+                tileContent={({ date, view }) => {
+                  if (view !== "month") return null;
+                  const holidayName = getHolidayName(date);
+                  return holidayName ? <span className="holiday-badge">祝</span> : null;
                 }}
               />
             </div>
