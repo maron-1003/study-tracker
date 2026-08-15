@@ -1105,6 +1105,8 @@ export default function StudyTracker({ user, onLogout }) {
               <Calendar
                 locale="ja-JP"
                 calendarStartDay={0}
+                formatShortWeekday={(locale, date) => ["日", "月", "火", "水", "木", "金", "土"][date.getDay()]}
+                formatLongWeekday={(locale, date) => ["日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"][date.getDay()]}
                 onChange={(value) =>
                   setSelectedDate(dayjs(value).format("YYYY-MM-DD"))
                 }
