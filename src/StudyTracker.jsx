@@ -48,6 +48,78 @@ dayjs.extend(isoWeek);
 
 const baseSubjects = ["国語", "数学", "英語", "理科", "社会"];
 
+const getHolidayName = (date) => {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const day = date.getDate();
+
+  const fixedHolidays = {
+    "1-1": "元日",
+    "1-2": "元日振替休日",
+    "1-3": "元日振替休日",
+    "2-11": "建国記念の日",
+    "4-29": "昭和の日",
+    "5-3": "憲法記念日",
+    "5-4": "みどりの日",
+    "5-5": "こどもの日",
+    "11-3": "文化の日",
+    "11-23": "勤労感謝の日",
+    "12-23": "天皇誕生日",
+  };
+
+  const fixedKey = `${month + 1}-${day}`;
+  if (fixedHolidays[fixedKey]) {
+    return fixedHolidays[fixedKey];
+  }
+
+  const getNthMonday = (monthIndex, nth) => {
+    const first = new Date(year, monthIndex, 1);
+    const firstWeekday = first.getDay();
+    const mondayOffset = (firstWeekday === 0 ? 6 : firstWeekday - 1);
+    return new Date(year, monthIndex, 1 + mondayOffset + (nth - 1) * 7);
+  };
+
+  if (month === 0 && day === getNthMonday(0, 2).getDate()) {
+    return "成人の日";
+  }
+
+  if (month === 6 && day === getNthMonday(6, 3).getDate()) {
+    return "海の日";
+  }
+
+  if (month === 7 && day === 11) {
+    return "山の日";
+  }
+
+  if (month === 8 && day === getNthMonday(8, 3).getDate()) {
+    return "敬老の日";
+  }
+
+  if (month === 9 && day === getNthMonday(9, 2).getDate()) {
+    return "スポーツの日";
+  }
+
+  const isVernalEquinox = (year) => {
+    const dayNumber = year <= 2024 ?
+      (year === 2023 ? 8 : year === 2024 ? 9 : 20) :
+      ((20.8431 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4)));
+    return Math.abs(day - Math.round(dayNumber)) < 1 && month === 2;
+  };
+
+  const isAutumnEquinox = (year) => {
+    const dayNumber = year <= 2024 ?
+      (year === 2023 ? 23 : year === 2024 ? 22 : 22) :
+      ((23.2488 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4)));
+    return Math.abs(day - Math.round(dayNumber)) < 1 && month === 8;
+  };
+
+  if (isVernalEquinox(year) || isAutumnEquinox(year)) {
+    return month === 2 ? "春分の日" : "秋分の日";
+  }
+
+  return null;
+};
+
 function getWeekNumber(date) {
   return dayjs(date).isoWeek();
 }
@@ -960,6 +1032,7 @@ export default function StudyTracker({ user, onLogout }) {
               border: 2px solid #3b82f6 !important;
               border-radius: 12px;
               padding: 10px;
+              font-family: sans-serif;
             }
             .react-calendar__tile {
               background: transparent !important;
@@ -998,6 +1071,24 @@ export default function StudyTracker({ user, onLogout }) {
               background: #2563eb !important;
               color: #ffffff !important;
             }
+            .sunday-day {
+              background: rgba(239, 68, 68, 0.18) !important;
+              color: #fca5a5 !important;
+            }
+            .saturday-day {
+              background: rgba(59, 130, 246, 0.18) !important;
+              color: #93c5fd !important;
+            }
+            .holiday-day {
+              background: rgba(251, 191, 36, 0.18) !important;
+              color: #fcd34d !important;
+              border: 1px solid rgba(251, 191, 36, 0.8) !important;
+            }
+            .holiday-day:hover,
+            .saturday-day:hover,
+            .sunday-day:hover {
+              filter: brightness(1.08);
+            }
           `}</style>
 
           <h1 className="text-4xl font-extrabold text-blue-400 mb-8 drop-shadow-[0_0_10px_#3b82f6]">
@@ -1012,6 +1103,8 @@ export default function StudyTracker({ user, onLogout }) {
               <h2 className="text-lg font-bold text-blue-300 mb-2">日付を選択</h2>
 
               <Calendar
+                locale="ja-JP"
+                calendarStartDay={0}
                 onChange={(value) =>
                   setSelectedDate(dayjs(value).format("YYYY-MM-DD"))
                 }
@@ -1019,6 +1112,18 @@ export default function StudyTracker({ user, onLogout }) {
                 tileDisabled={({ date, view }) =>
                   view === "month" && dayjs(date).isAfter(dayjs(), "day")
                 }
+                tileClassName={({ date, view }) => {
+                  if (view !== "month") return "";
+
+                  const classes = [];
+                  const holidayName = getHolidayName(date);
+
+                  if (date.getDay() === 0) classes.push("sunday-day");
+                  if (date.getDay() === 6) classes.push("saturday-day");
+                  if (holidayName) classes.push("holiday-day");
+
+                  return classes.join(" ");
+                }}
               />
             </div>
 
