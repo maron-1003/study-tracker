@@ -1053,7 +1053,7 @@ export default function StudyTracker({ user, onLogout }) {
               userId={user.id}
               subjects={subjects}
               records={records}
-              selectedDate={selectedDate}
+              selectedDate={new Date()}
               goalNotificationsEnabled={notificationSettings.goal}
               onGoalReached={notifyPeriodGoalReached}
             />

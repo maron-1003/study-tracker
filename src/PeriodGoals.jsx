@@ -27,6 +27,7 @@ export default function PeriodGoals({
   goalNotificationsEnabled,
   onGoalReached,
 }) {
+  const currentDate = dayjs();
   const [goals, setGoals] = useState(() => {
     const saved = localStorage.getItem(storageKey(userId));
     return saved ? JSON.parse(saved) : [];
@@ -56,7 +57,7 @@ export default function PeriodGoals({
 
   const goalProgress = useMemo(
     () => goals.map((goal) => {
-      const range = getRange(selectedDate, goal.period);
+      const range = getRange(currentDate, goal.period);
       const actualMinutes = records
         .filter(
           (record) =>
@@ -65,20 +66,20 @@ export default function PeriodGoals({
         .reduce((sum, record) => sum + record.minutes, 0);
       return { ...goal, actualMinutes, remaining: Math.max(goal.targetMinutes - actualMinutes, 0) };
     }),
-    [goals, records, selectedDate]
+    [goals, records, currentDate]
   );
 
   useEffect(() => {
     if (!goalNotificationsEnabled) return;
 
     const newlyReached = goalProgress.filter((goal) => {
-      const range = getRange(selectedDate, goal.period);
+      const range = getRange(currentDate, goal.period);
       const key = `${goal.id}:${range.start}`;
       return goal.actualMinutes >= goal.targetMinutes && !notifiedGoalKeys.current.has(key);
     });
 
     newlyReached.forEach((goal) => {
-      const range = getRange(selectedDate, goal.period);
+      const range = getRange(currentDate, goal.period);
       notifiedGoalKeys.current.add(`${goal.id}:${range.start}`);
       onGoalReached(goal);
     });
@@ -89,7 +90,7 @@ export default function PeriodGoals({
         JSON.stringify([...notifiedGoalKeys.current])
       );
     }
-  }, [goalNotificationsEnabled, goalProgress, onGoalReached, selectedDate, userId]);
+  }, [goalNotificationsEnabled, goalProgress, onGoalReached, currentDate, userId]);
 
   return (
     <section className="w-full max-w-6xl rounded-xl bg-gray-800 p-5 shadow-lg">
