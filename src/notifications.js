@@ -1,8 +1,8 @@
 export const defaultNotificationSettings = {
-  pomodoro: true,
-  achievement: true,
-  goal: true,
-  reminder: true,
+  pomodoro: false,
+  achievement: false,
+  goal: false,
+  reminder: false,
 };
 
 const storageKey = (userId) => `notificationSettings:${userId}`;

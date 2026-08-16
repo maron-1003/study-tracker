@@ -5,7 +5,7 @@ const notificationTypes = [
   { id: "reminder", label: "毎日20時のリマインド", test: "今日まだ勉強していないことを通知します" },
 ];
 
-export default function NotificationSettings({ settings, onToggle, onTest }) {
+export default function NotificationSettings({ settings, onToggle, onTest, onRequestPermission }) {
   const permissionState = typeof Notification !== "undefined" ? Notification.permission : "unsupported";
 
   return (
@@ -19,9 +19,21 @@ export default function NotificationSettings({ settings, onToggle, onTest }) {
             : "通知を許可してから、各種類を個別に切り替えられます。"}
       </p>
 
+      {permissionState !== "granted" && (
+        <div className="mb-4 space-y-2 rounded-lg border border-sky-500/60 bg-sky-500/10 p-3 text-sm text-sky-100">
+          <p>通知を有効にすると、目標達成やリマインドを自然に受け取れます。</p>
+          <button
+            onClick={onRequestPermission}
+            className="rounded bg-sky-600 px-3 py-2 font-bold hover:bg-sky-700"
+          >
+            通知を許可する
+          </button>
+        </div>
+      )}
+
       {permissionState === "denied" && (
         <div className="mb-4 rounded-lg border border-yellow-500/60 bg-yellow-500/10 p-3 text-sm text-yellow-100">
-          iPhone / iPad では Safari の設定から通知を許可する必要があります。ブラウザの設定画面で許可を切り替えてください。
+          Android / iPhone ではブラウザ設定から通知を許可してください。許可後、再度この画面で通知を有効にしてください。
         </div>
       )}
 

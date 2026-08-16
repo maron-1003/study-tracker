@@ -823,13 +823,33 @@ export default function StudyTracker({ user, onLogout }) {
     return true;
   };
 
+  const requestBrowserPermission = async () => {
+    const granted = await requestNotificationPermission();
+    if (!granted) {
+      alert("通知の許可が必要です。Android / iPhone ではブラウザ設定から許可してください。");
+      return false;
+    }
+
+    const nextSettings = {
+      ...notificationSettings,
+      pomodoro: notificationSettings.pomodoro || true,
+      achievement: notificationSettings.achievement || true,
+      goal: notificationSettings.goal || true,
+      reminder: notificationSettings.reminder || true,
+    };
+
+    setNotificationSettings(nextSettings);
+    saveNotificationSettings(user.id, nextSettings);
+    return true;
+  };
+
   const toggleNotificationSetting = async (type) => {
     const nextValue = !notificationSettings[type];
 
     if (nextValue) {
       const granted = await requestNotificationPermission();
       if (!granted) {
-        alert("通知の許可が必要です。iPhone / iPad では Safari の設定で通知を許可してください。");
+        alert("通知の許可が必要です。Android / iPhone ではブラウザ設定から許可してください。");
         return;
       }
     }
@@ -1547,6 +1567,7 @@ export default function StudyTracker({ user, onLogout }) {
           settings={notificationSettings}
           onToggle={toggleNotificationSetting}
           onTest={testNotification}
+          onRequestPermission={requestBrowserPermission}
         />
       )}
 
