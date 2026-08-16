@@ -17,7 +17,10 @@ export const saveNotificationSettings = (userId, settings) => {
 };
 
 export const requestNotificationPermission = async () => {
-  if (!("Notification" in window)) return false;
+  if (!("Notification" in window) || typeof Notification.requestPermission !== "function") {
+    return false;
+  }
+
   const permission =
     Notification.permission === "default"
       ? await Notification.requestPermission()
@@ -26,10 +29,25 @@ export const requestNotificationPermission = async () => {
   return permission === "granted";
 };
 
-export const sendBrowserNotification = async (title, body) => {
-  const granted = await requestNotificationPermission();
+export const getNotificationPermissionState = () => {
+  if (!("Notification" in window)) return "unsupported";
+  return Notification.permission;
+};
 
-  if (!granted) return false;
-  new Notification(title, { body });
-  return true;
+export const sendBrowserNotification = async (title, body) => {
+  if (!("Notification" in window)) return false;
+
+  const permission = Notification.permission;
+  if (permission !== "granted") {
+    const granted = await requestNotificationPermission();
+    if (!granted) return false;
+  }
+
+  try {
+    new Notification(title, { body });
+    return true;
+  } catch (error) {
+    console.warn("通知送信に失敗しました:", error);
+    return false;
+  }
 };

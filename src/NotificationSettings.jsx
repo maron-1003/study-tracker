@@ -6,10 +6,24 @@ const notificationTypes = [
 ];
 
 export default function NotificationSettings({ settings, onToggle, onTest }) {
+  const permissionState = typeof Notification !== "undefined" ? Notification.permission : "unsupported";
+
   return (
     <section className="w-full max-w-6xl rounded-xl bg-gray-800 p-5 shadow-lg">
       <h2 className="text-xl font-bold text-sky-300">通知設定</h2>
-      <p className="mb-4 text-sm text-gray-400">通知を許可してから、各種類を個別に切り替えられます。</p>
+      <p className="mb-4 text-sm text-gray-400">
+        {permissionState === "granted"
+          ? "通知は許可されています。各種類を個別に切り替えられます。"
+          : permissionState === "denied"
+            ? "通知がブロックされています。ブラウザ設定で許可を変更してください。"
+            : "通知を許可してから、各種類を個別に切り替えられます。"}
+      </p>
+
+      {permissionState === "denied" && (
+        <div className="mb-4 rounded-lg border border-yellow-500/60 bg-yellow-500/10 p-3 text-sm text-yellow-100">
+          iPhone / iPad では Safari の設定から通知を許可する必要があります。ブラウザの設定画面で許可を切り替えてください。
+        </div>
+      )}
 
       <div className="space-y-2">
         {notificationTypes.map((item) => (

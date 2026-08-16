@@ -30,6 +30,7 @@ import {
   loadNotificationSettings,
   saveNotificationSettings,
   sendBrowserNotification,
+  requestNotificationPermission,
 } from "./notifications";
 
 
@@ -822,10 +823,20 @@ export default function StudyTracker({ user, onLogout }) {
     return true;
   };
 
-  const toggleNotificationSetting = (type) => {
+  const toggleNotificationSetting = async (type) => {
+    const nextValue = !notificationSettings[type];
+
+    if (nextValue) {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        alert("通知の許可が必要です。iPhone / iPad では Safari の設定で通知を許可してください。");
+        return;
+      }
+    }
+
     const nextSettings = {
       ...notificationSettings,
-      [type]: !notificationSettings[type],
+      [type]: nextValue,
     };
     setNotificationSettings(nextSettings);
     saveNotificationSettings(user.id, nextSettings);
@@ -1033,11 +1044,15 @@ export default function StudyTracker({ user, onLogout }) {
               border-radius: 12px;
               padding: 10px;
               font-family: sans-serif;
+              width: 100%;
+              max-width: 100%;
             }
             .react-calendar__tile {
               background: transparent !important;
               color: white !important;
               border-radius: 8px;
+              position: relative;
+              min-height: 42px;
             }
             .react-calendar__month-view__days__day--neighboringMonth {
               color: #6b7280 !important;
@@ -1100,6 +1115,29 @@ export default function StudyTracker({ user, onLogout }) {
               background: rgba(250, 204, 21, 0.28);
               color: #fef3c7;
               border: 1px solid rgba(250, 204, 21, 0.7);
+              pointer-events: none;
+            }
+            @media (max-width: 768px) {
+              .react-calendar {
+                padding: 8px;
+              }
+              .react-calendar__navigation {
+                min-height: 36px;
+              }
+              .react-calendar__tile {
+                min-height: 36px;
+                font-size: 12px;
+              }
+              .react-calendar__month-view__weekdays__weekday {
+                font-size: 11px;
+                padding: 6px 0;
+              }
+              .holiday-badge {
+                right: 2px;
+                bottom: 2px;
+                font-size: 8px;
+                padding: 1px 3px;
+              }
             }
           `}</style>
 
