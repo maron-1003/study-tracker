@@ -517,25 +517,71 @@ export default function StudyTracker({ user, onLogout }) {
   }, [progressMinutes, dailyGoal, goalTriggered, goalSubject, notificationSettings.goal]);
 
   useEffect(() => {
-    if (!notificationSettings.achievement) return;
+    if (!notificationSettings.achievement || !user?.id) return;
 
     const newlyEarned = achievements.filter(
       (achievement) => achievement.earned && !notifiedAchievementIds.current.has(achievement.id)
     );
     if (newlyEarned.length === 0) return;
 
-    newlyEarned.forEach((achievement) => {
+    newlyEarned.forEach(async (achievement) => {
       notifiedAchievementIds.current.add(achievement.id);
+
+      try {
+        await supabase.from("notifications").insert([
+          {
+            user_id: user.id,
+            type: "achievement",
+            title: "バッジを獲得！",
+            body: `${achievement.icon} ${achievement.name}を獲得しました。`,
+            payload: {
+              achievementId: achievement.id,
+              achievementName: achievement.name,
+            },
+          },
+        ]);
+      } catch (error) {
+        console.warn("通知保存に失敗しました:", error);
+      }
+
       void sendBrowserNotification(
         "バッジを獲得！",
         `${achievement.icon} ${achievement.name}を獲得しました。`
       );
     });
+
     localStorage.setItem(
       `notifiedAchievements:${user.id}`,
       JSON.stringify([...notifiedAchievementIds.current])
     );
   }, [achievements, notificationSettings.achievement, user.id]);
+
+  useEffect(() => {
+    if (!user?.id) return undefined;
+
+    const channel = supabase
+      .channel(`user_notifications:${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const notification = payload.new;
+          if (!notification || notification.type !== "achievement") return;
+          if (!notificationSettings.achievement) return;
+          void sendBrowserNotification(notification.title, notification.body);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [notificationSettings.achievement, user.id]);
 
   useEffect(() => {
     if (!notificationSettings.reminder) return undefined;
