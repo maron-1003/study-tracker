@@ -24,8 +24,7 @@ export const getAchievements = ({ records, goalSubject, dailyGoal }) => {
   ];
 };
 
-export const getLevelInfo = (records) => {
-  const totalMinutes = records.reduce((sum, record) => sum + record.minutes, 0);
+export const getLevelInfoFromMinutes = (totalMinutes) => {
   const totalHours = totalMinutes / 60;
 
   let level = 1;
@@ -54,4 +53,9 @@ export const getLevelInfo = (records) => {
     nextLevelMinutes,
     progress,
   };
+};
+
+export const getLevelInfo = (records) => {
+  const totalMinutes = records.reduce((sum, record) => sum + record.minutes, 0);
+  return getLevelInfoFromMinutes(totalMinutes);
 };

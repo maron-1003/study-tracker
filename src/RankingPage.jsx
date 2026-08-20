@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { getLevelInfoFromMinutes } from "./achievements";
 import { supabase } from "./supabaseClient";
 import { getStreakStats } from "./streaks";
 
@@ -120,21 +121,30 @@ export default function RankingPage({ user }) {
           {!isLoading && !errorMessage && ranking.length === 0 && (
             <p className="text-gray-400">この期間の記録はまだありません</p>
           )}
-          {!isLoading && !errorMessage && ranking.map((item, index) => (
-            <div
-              key={item.userId}
-              className={`flex justify-between p-3 border-b border-gray-700 ${
-                item.userId === user.id ? "bg-blue-900/40" : ""
-              }`}
-            >
-              <span>{index + 1}位</span>
-              <span>{userMap[item.userId] ?? "名無し"}</span>
-              <span className="text-orange-300">
-                🔥 {streaksByUser[item.userId]?.currentStreak ?? 0}日連続
-              </span>
-              <span>{item.minutes}分</span>
-            </div>
-          ))}
+          {!isLoading && !errorMessage && ranking.map((item, index) => {
+            const titleInfo = getLevelInfoFromMinutes(item.minutes);
+
+            return (
+              <div
+                key={item.userId}
+                className={`flex items-center justify-between gap-3 p-3 border-b border-gray-700 ${
+                  item.userId === user.id ? "bg-blue-900/40" : ""
+                }`}
+              >
+                <span>{index + 1}位</span>
+                <div className="flex flex-1 items-center gap-2 min-w-0">
+                  <span className="truncate">{userMap[item.userId] ?? "名無し"}</span>
+                  <span className="inline-flex items-center rounded-full border border-purple-500/60 bg-purple-500/10 px-2 py-0.5 text-[10px] font-bold text-purple-200 whitespace-nowrap">
+                    {titleInfo.icon} {titleInfo.title}
+                  </span>
+                </div>
+                <span className="text-orange-300 whitespace-nowrap">
+                  🔥 {streaksByUser[item.userId]?.currentStreak ?? 0}日連続
+                </span>
+                <span className="whitespace-nowrap">{item.minutes}分</span>
+              </div>
+            );
+          })}
         </div>
       </main>
     </div>
