@@ -70,6 +70,14 @@ export default function RankingPage({ user }) {
   }, [records, tab]);
 
   const myRank = ranking.findIndex((item) => item.userId === user.id) + 1;
+  const totalMinutesByUser = useMemo(
+    () =>
+      records.reduce((result, record) => {
+        result[record.user_id] = (result[record.user_id] ?? 0) + record.minutes;
+        return result;
+      }, {}),
+    [records]
+  );
   const streaksByUser = useMemo(() => {
     const recordsByUser = records.reduce((result, record) => {
       (result[record.user_id] ??= []).push(record);
@@ -122,7 +130,7 @@ export default function RankingPage({ user }) {
             <p className="text-gray-400">この期間の記録はまだありません</p>
           )}
           {!isLoading && !errorMessage && ranking.map((item, index) => {
-            const titleInfo = getLevelInfoFromMinutes(item.minutes);
+            const titleInfo = getLevelInfoFromMinutes(totalMinutesByUser[item.userId] ?? 0);
 
             return (
               <div
