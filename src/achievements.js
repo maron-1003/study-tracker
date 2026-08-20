@@ -23,3 +23,35 @@ export const getAchievements = ({ records, goalSubject, dailyGoal }) => {
     { id: "daily-goal", icon: "🎯", name: "目標クリア", description: "日次目標を初めて達成する", earned: todayGoalMinutes >= dailyGoal },
   ];
 };
+
+export const getLevelInfo = (records) => {
+  const totalMinutes = records.reduce((sum, record) => sum + record.minutes, 0);
+  const totalHours = totalMinutes / 60;
+
+  let level = 1;
+  let title = "基礎学習者";
+  let icon = "🌱";
+
+  if (totalHours >= 30) {
+    level = 3;
+    title = "目標達成者";
+    icon = "🏆";
+  } else if (totalHours >= 10) {
+    level = 2;
+    title = "継続型";
+    icon = "🔥";
+  }
+
+  const nextLevelMinutes = level === 1 ? 600 : level === 2 ? 1800 : null;
+  const progress = nextLevelMinutes ? Math.min((totalMinutes / nextLevelMinutes) * 100, 100) : 100;
+
+  return {
+    level,
+    title,
+    icon,
+    totalMinutes,
+    totalHours,
+    nextLevelMinutes,
+    progress,
+  };
+};

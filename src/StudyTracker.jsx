@@ -1605,7 +1605,7 @@ export default function StudyTracker({ user, onLogout }) {
       )}
 
       {activeTab === "badges" && (
-        <AchievementsPanel achievements={achievements} />
+        <AchievementsPanel achievements={achievements} records={records} />
       )}
 
       {activeTab === "notifications" && (
